@@ -22,8 +22,8 @@ public class IlrpServer extends Thread {
                 Socket clientSocket = serverSocket.accept();
                 System.out.println("[DAEMON] New connection from: " + clientSocket.getInetAddress() + ":" + clientSocket.getPort());
                 
-                IlrpSession server = new IlrpSession(clientSocket);
-                server.start();
+                IlrpSession session = new IlrpSession(clientSocket);
+                session.start();
         	}
         } catch (IOException e) {
             System.out.println("[DAEMON] Can not start server on port " + PORT_NUM);

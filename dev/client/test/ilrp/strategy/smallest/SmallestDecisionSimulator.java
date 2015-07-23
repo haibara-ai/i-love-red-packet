@@ -17,7 +17,7 @@ public class SmallestDecisionSimulator {
 	public static final int 	n 				= 4;
 	public static final int 	tax 			= 10;
 	private static final int 	MAX_ROUND 		= 10;
-	private static final int 	MAX_ITERATION	= 100;
+	private static final int 	MAX_ITERATION	= 1000;
 	
 	public static void main(String[] args) throws ClassNotFoundException {
 //		ClassLoader.getSystemClassLoader().loadClass(SmallestProbility.class.getName());

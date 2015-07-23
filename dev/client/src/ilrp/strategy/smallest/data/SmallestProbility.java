@@ -14,7 +14,6 @@ public class SmallestProbility {
 		data = new double[GameUtil.MAX_PLAYERS + 1][][];
 		for (int n = GameUtil.MIN_PLAYERS; n <= GameUtil.MAX_PLAYERS; n++) {
 			String filename = SmallestProbabilityGenerator.getProbFilename(
-					true,
 					n, 
 					DataPrecision.PROB_DIV, 
 					DataPrecision.PROB_AVERAGE_DUPLICATION
@@ -44,5 +43,11 @@ public class SmallestProbility {
 		} else {
 			throw new IllegalArgumentException("p1=" + p1 + ", p2=" + p2);
 		}
+	}
+
+	/**
+	 * A dummy method, just to force initialization of this class
+	 */
+	public static void initialize() {
 	}
 };

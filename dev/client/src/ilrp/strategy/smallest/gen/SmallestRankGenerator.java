@@ -51,17 +51,17 @@ public class SmallestRankGenerator extends AbstractDataGenerator{
 		return e;
 	}
 	
-	public static String getRankFilename(boolean isOnline, int n, int tax, int samples, int raw) {
-		return getDataPathPrefix(isOnline) + "/rank-" + n + "-" + tax + "-" + samples + "x" + raw + ".txt";
+	public static String getRankFilename(int n, int tax, int samples, int raw) {
+		return getDataPathPrefix() + "/rank-" + n + "-" + tax + "-" + samples + "x" + raw + ".txt";
 	}
 	
-	public static void main(String[] args) throws IOException {
+	public static void generate() throws IOException {
 		for (int n = GameUtil.MIN_PLAYERS; n <= GameUtil.MAX_PLAYERS; n++) {
-			for (int tax = 0; tax <= GameUtil.MAX_TAX; tax++) {
+			for (int tax : GameUtil.TAXES) {
 				System.out.println("n=" + n + ", tax=" + tax + "%");
 				
 				long start = System.currentTimeMillis();
-				File file = new File(getRankFilename(false, n, tax, DataPrecision.RANK_SAMPLES, DataPrecision.RANK_RAW_SAMPLES));
+				File file = new File(getRankFilename(n, tax, DataPrecision.RANK_SAMPLES, DataPrecision.RANK_RAW_SAMPLES));
 				ensureFile(file);
 				String s = arrayToColumn(buildTable(n, tax, 1));
 				writeToFile(file, s);

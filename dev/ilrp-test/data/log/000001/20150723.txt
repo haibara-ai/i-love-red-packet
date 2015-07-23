@@ -1,0 +1,4 @@
+2015-07-23 15:49:57 | + 100.00	 |IncomeRequest [type=1, amount=10000, sender=alice, group=public-group, time=Thu Jul 23 15:49:57 CST 2015]
+2015-07-23 15:49:57 | + 123.00	 |IncomeRequest [type=1, amount=12300, sender=bob, group=public-group, time=Thu Jul 23 15:49:57 CST 2015]
+2015-07-23 15:49:57 | - 144.00	 |ExpenseRequest [type=1, totalAmount=40000, savedAmount=25600, intGroup=private-group, extGroup=public-group, time=Thu Jul 23 15:49:57 CST 2015]
+2015-07-23 15:49:57 |     0.00	 |MissPacketRequest [time=Thu Jul 23 15:49:57 CST 2015]

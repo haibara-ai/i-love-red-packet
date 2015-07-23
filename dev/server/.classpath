@@ -2,7 +2,7 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/protocol"/>
 	<classpathentry kind="lib" path="lib/simple-xml-2.7.1.jar"/>
+	<classpathentry kind="lib" path="lib/exported.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

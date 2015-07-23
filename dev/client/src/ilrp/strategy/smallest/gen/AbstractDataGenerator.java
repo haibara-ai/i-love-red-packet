@@ -5,12 +5,10 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 public class AbstractDataGenerator {
-	private static final String DATA_DIR 		= "data";
-	private static final String ONLINE_PREFIX 	= "online";
-	private static final String GENERATE_PREFIX = "gen";
+	private static final String DATA_DIR 		= "data/gen";
 
-	public static String getDataPathPrefix(boolean isOnline) {
-		return DATA_DIR + "/" + (isOnline ? ONLINE_PREFIX : GENERATE_PREFIX);
+	public static String getDataPathPrefix() {
+		return DATA_DIR;
 	}
 	
 	protected static String matrixToText(double[][] t) {

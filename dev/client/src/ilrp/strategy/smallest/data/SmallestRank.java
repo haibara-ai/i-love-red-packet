@@ -17,11 +17,15 @@ public class SmallestRank {
 	
 	static {
 		System.out.print("Loading rank ... ");
-		data = new double[GameUtil.MAX_PLAYERS + 1][GameUtil.MAX_TAX + 1][];
+		int maxTax = GameUtil.TAXES[0];
+		for (int tax : GameUtil.TAXES) {
+			if (tax > maxTax)
+				maxTax = tax;
+		}
+		data = new double[GameUtil.MAX_PLAYERS + 1][maxTax + 1][];
 		for (int n = GameUtil.MIN_PLAYERS; n <= GameUtil.MAX_PLAYERS; n++) {
-			for (int tax = 0; tax <= GameUtil.MAX_TAX; tax++) {
+			for (int tax : GameUtil.TAXES) {
 				String filename = SmallestRankGenerator.getRankFilename(
-						true,
 						n,
 						tax,
 						DataPrecision.RANK_SAMPLES,
@@ -51,5 +55,11 @@ public class SmallestRank {
 		int index = Arrays.binarySearch(samples, exp);
 		int position = (index >= 0) ? index : -(index + 1);	// [0, length]
 		return 1.0 - 1.0 * position / samples.length;
+	}
+	
+	/**
+	 * A dummy method, just to force initialization of this class
+	 */
+	public static void initialize() {
 	}
 };

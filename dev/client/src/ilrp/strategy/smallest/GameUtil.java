@@ -7,8 +7,10 @@ public class GameUtil {
 	public static final int MIN_PLAYERS = 4;
 	// 最少玩家
 	public static final int MAX_PLAYERS = 5;
-	// 最大抽水, 10%
-	public static final int MAX_TAX 	= 10;
+	// 抽水百分数
+	public static final int[] TAXES 	= new int[] {
+		0, 5, 10, 15
+	};
 	
 	/**
 	 * Red Packet to String
@@ -41,5 +43,4 @@ public class GameUtil {
 		double p = SmallestProbility.getValue(n, p1, p2);
 		return (p1 + p2 - penalty) * p + (p1 + p2) * (1 - p);
 	}
-	
 }

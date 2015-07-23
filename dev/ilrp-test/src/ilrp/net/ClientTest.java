@@ -1,13 +1,12 @@
 package ilrp.net;
 
-import ilrp.net.IlrpClient;
-import ilrp.net.IlrpServer;
 import ilrp.protocol.common.Callback;
 import ilrp.protocol.common.Request;
 import ilrp.protocol.common.Response;
 import ilrp.protocol.packet.AuthRequest;
 import ilrp.protocol.packet.ExpenseRequest;
 import ilrp.protocol.packet.IncomeRequest;
+import ilrp.protocol.packet.MissPacketRequest;
 
 import java.io.IOException;
 import java.util.Calendar;
@@ -59,6 +58,11 @@ public class ClientTest {
 				Calendar.getInstance().getTime()
 				);
 		client.sendMessage(r4, echo);
+		
+		MissPacketRequest r5 = new MissPacketRequest(
+				Calendar.getInstance().getTime()
+				);
+		client.sendMessage(r5, echo);
 		
 	}
 

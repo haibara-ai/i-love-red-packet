@@ -11,6 +11,8 @@ import ilrp.protocol.packet.ExpenseRequest;
 import ilrp.protocol.packet.ExpenseResponse;
 import ilrp.protocol.packet.IncomeRequest;
 import ilrp.protocol.packet.IncomeResponse;
+import ilrp.protocol.packet.MissPacketRequest;
+import ilrp.protocol.packet.MissPacketResponse;
 import ilrp.util.DateUtil;
 
 import java.io.IOException;
@@ -85,8 +87,20 @@ public class IlrpSession extends Thread {
 			return handleIncomeRequest((IncomeRequest) req);
 		} else if (req instanceof ExpenseRequest) {
 			return handleExpenseRequest((ExpenseRequest) req);
+		} else if (req instanceof MissPacketRequest) {
+			return handleMissPacketRequest((MissPacketRequest) req);
 		} else {
 			throw new RuntimeException("unknown request type: " + req.getClass().getName());
+		}
+	}
+
+	private Response handleMissPacketRequest(MissPacketRequest req) {
+		if (userCode == null) {
+			return new MissPacketResponse(MissPacketResponse.ERROR);
+		} else {
+			String msg = " " + String.format("%4d.%02d", 0, 0) + "\t |" + req.toString();
+			DbAccess.appendLog(userCode, msg);
+			return new MissPacketResponse(MissPacketResponse.STATUS_OK);
 		}
 	}
 

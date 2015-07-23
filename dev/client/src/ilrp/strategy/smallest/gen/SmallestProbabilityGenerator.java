@@ -38,19 +38,20 @@ public class SmallestProbabilityGenerator extends AbstractDataGenerator{
 				}
 			}
 		}
+		regulate(t);
 		return t;
 	}
 	
-	public static String getProbFilename(boolean isOnline, int n, int div, long dup) {
-		return getDataPathPrefix(isOnline) + "/table-" + n + "-" + div + "x" + dup + ".txt";
+	public static String getProbFilename(int n, int div, long dup) {
+		return getDataPathPrefix() + "/table-" + n + "-" + div + "x" + dup + ".txt";
 	}
 	
-	public static void main(String[] args) throws IOException {
+	public static void generate() throws IOException {
 		double total = 1;
 		for (int n = GameUtil.MIN_PLAYERS; n <= GameUtil.MAX_PLAYERS; n++) {
 			System.out.println("n=" + n);
 			
-			File file = new File(getProbFilename(false, n, DataPrecision.PROB_DIV, DataPrecision.PROB_AVERAGE_DUPLICATION));
+			File file = new File(getProbFilename(n, DataPrecision.PROB_DIV, DataPrecision.PROB_AVERAGE_DUPLICATION));
 			ensureFile(file);
 			long start = System.currentTimeMillis();
 			String s = matrixToText(buildTable(total, n));
@@ -58,5 +59,73 @@ public class SmallestProbabilityGenerator extends AbstractDataGenerator{
 			
 			System.out.println("time=" + (System.currentTimeMillis() - start) + "ms.");
 		}
+	}
+	
+	/**
+	 * It holds that:
+	 * 
+	 * t[i1][j1] >= t[i2][j2] for i1 >= i2 && j2 >= j2
+	 * 
+	 * The result is obtained from Monte-Carlo, which may violates this rule.
+	 * We adjust the result.
+	 * 
+	 * @param t
+	 * @return
+	 */
+	private static void regulate(double[][] t) {
+		int modified = 0;
+		int M = t.length;
+		int i, j;
+		// first column
+		j = 0;
+		for (i = 1; i + 1 < M; i++) {
+			boolean violation = !(t[i - 1][j] >= t[i][j] && t[i][j] >= t[i + 1][j]);
+			if (violation) {
+				// assume local linear
+				double tp = (t[i - 1][j] + t[i + 1][j]) / 2;
+				System.out.print(String.format("adjust (%d,%d) from %1.4f to %1.4f", i, j, t[i][j], tp));
+				System.out.println(String.format("  col: %1.4f -> %1.4f -> %1.4f;", 
+						t[i - 1][j], t[i][j], t[i + 1][j]
+						));
+				t[i][j] = tp;
+				modified ++;
+			}
+		}
+		// first row
+		i = 0;
+		for (j = 1; j + 1 < M; j++) {
+			boolean violation = !(t[i][j - 1] >= t[i][j] && t[i][j] >= t[i][j + 1]);
+			if (violation) {
+				// assume local linear
+				double tp = (t[i][j - 1] + t[i][j + 1]) / 2;
+				System.out.print(String.format("adjust (%d,%d) from %1.4f to %1.4f", i, j, t[i][j], tp));
+				System.out.println(String.format("  row: %1.4f -> %1.4f -> %1.4f;", 
+						t[i][j - 1], t[i][j], t[i][j + 1]
+						));
+				t[i][j] = tp;
+				modified ++;
+			}
+		}
+		// M x M matrix
+		for (i = 1; i + 1 < M; i++) {
+			for (j = 1; j + 1 < M; j++) {
+				boolean violation = !(
+						t[i - 1][j] >= t[i][j] && t[i][j] >= t[i + 1][j] &&
+						t[i][j - 1] >= t[i][j] && t[i][j] >= t[i][j + 1]
+						);
+				if (violation) {
+					// assume local linear
+					double tp = (t[i - 1][j] + t[i + 1][j] + t[i][j - 1] + t[i][j + 1]) / 4;
+					System.out.print(String.format("adjust (%d,%d) from %1.4f to %1.4f", i, j, t[i][j], tp));
+					System.out.println(String.format("  row: %1.4f -> %1.4f -> %1.4f, col: %1.4f -> %1.4f -> %1.4f;", 
+							t[i][j - 1], t[i][j], t[i][j + 1],
+							t[i - 1][j], t[i][j], t[i + 1][j]
+							));
+					t[i][j] = tp;
+					modified ++;
+				}
+			}
+		}
+		System.out.println(String.format("Regulation: %d out of %d cells are modofied.", modified, M * M));
 	}
 }
