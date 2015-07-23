@@ -14,9 +14,6 @@ import java.util.LinkedList;
 import java.util.Queue;
 
 public class IlrpClient {
-	private static final String HOST_NAME 	= "localhost";
-	private static final int PORT_NUM		= 11307;
-	
 	private static class Pair<F, S> {
 		public Pair(F f, S s) {
 			this.first = f;
@@ -77,8 +74,9 @@ public class IlrpClient {
 		status = ClientStatus.DISCONNECTED;
 	}
 	
-	public void openConnection() throws UnknownHostException, IOException {
-	    socket = new Socket(HOST_NAME, PORT_NUM);
+	public void openConnection(String host, int port) throws UnknownHostException, IOException {
+	    socket = new Socket(host, port);
+	    socket.setSoTimeout(20000);	// wait 20s for response
 	    status = ClientStatus.UNAUTHORIZED;
 	    os = new ObjectOutputStream(socket.getOutputStream());
 	    is = new ObjectInputStream(socket.getInputStream());
@@ -87,8 +85,17 @@ public class IlrpClient {
 	}
 	
 	public void closeConnection() throws IOException {
-		socket.close();
-	    status = ClientStatus.CLOSED;
+		// close directly
+		status = ClientStatus.CLOSED;
+		if (!socket.isClosed()) {
+			try {
+				socket.close();
+			} catch (IOException e) {
+			}
+		}
+	    synchronized (pending) {
+			pending.clear();
+		}
 	}
 
 	/**
@@ -122,6 +129,7 @@ public class IlrpClient {
 	 */
 	private Response sendMessage(Request request) throws IOException, ClassNotFoundException {
 		os.writeObject(request);
+		os.flush();
 		return (Response) is.readObject();
 	}
 	

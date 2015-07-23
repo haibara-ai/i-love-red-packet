@@ -1,4 +1,4 @@
 <users>
-   <user name="alice" code="000001" enable="true" expiration="2015-07-21 12:16:53.606 CST" income="1000000"/>
-   <user name="bob" code="000002" enable="true" expiration="2015-07-21 12:16:53.617 CST" income="2000000"/>
+   <user name="alice" code="000001" enable="true" expiration="2015-07-30 23:59:59.999 CST" />
+   <user name="bob" code="000002" enable="true" expiration="2015-07-30 23:59:59.999 CST" />
 </users>

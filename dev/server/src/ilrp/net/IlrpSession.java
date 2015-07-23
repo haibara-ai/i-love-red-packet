@@ -15,6 +15,7 @@ import ilrp.protocol.packet.MissPacketRequest;
 import ilrp.protocol.packet.MissPacketResponse;
 import ilrp.util.DateUtil;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -28,7 +29,7 @@ public class IlrpSession extends Thread {
 		CLOSED,			// authorization failed or other failures
 	}
 	
-	private Socket client;
+	private Socket socket;
 	private ObjectInputStream is;
 	private ObjectOutputStream os;
 	private ClientStatus status;
@@ -36,14 +37,14 @@ public class IlrpSession extends Thread {
 	private String userCode;
 	
 	public IlrpSession(Socket client) {
-		this.client = client;
+		this.socket = client;
 	}
 	
 	@Override
 	public void run() {
 		try {
-			this.os = new ObjectOutputStream(client.getOutputStream());
-			this.is = new ObjectInputStream(client.getInputStream());
+			this.os = new ObjectOutputStream(socket.getOutputStream());
+			this.is = new ObjectInputStream(socket.getInputStream());
 			this.status = ClientStatus.CONNECTED;
 		} catch (IOException e) {
 			this.status = ClientStatus.CLOSED;
@@ -53,23 +54,27 @@ public class IlrpSession extends Thread {
 		while (status != ClientStatus.CLOSED) {
 			try {
 				Request req = (Request) is.readObject();
-				System.out.println("[SERVER] Request received: " + req.toString());
+				System.out.println("[SERVER][" + userCode + "] Request: " + req.toString());
 				Response res = handle(req);
-				System.out.println("[SERVER] Sending response: " + res.toString());
+				System.out.println("[SERVER][" + userCode + "] Response: " + res.toString());
 				os.writeObject(res);
-				System.out.println("[SERVER] OK.");
+				os.flush();
+				System.out.println("[SERVER][" + userCode + "] OK.");
+			} catch (EOFException e) {
+				System.out.println("[SOCKET][" + userCode + "] Closed from the client.");
+				status = ClientStatus.CLOSED;
 			} catch (ClassNotFoundException | IOException e) {
-				System.out.println("[SOCKET] Error reading request.");
 				e.printStackTrace();
+				System.out.println("[SOCKET][" + userCode + "] Error reading request: " + e.getMessage());
 				status = ClientStatus.CLOSED;
 			} catch (RuntimeException e) {
-				System.out.println("[SERVER] RuntimeException: " + e.getMessage());
+				System.out.println("[SERVER][" + userCode + "] RuntimeException: " + e.getMessage());
 				status = ClientStatus.CLOSED;
 			}
 		}
 		try {
-			client.close();
-			System.out.println("[SOCKET] Socket closed.");
+			socket.close();
+			System.out.println("[SOCKET][" + userCode + "] Socket closed.");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

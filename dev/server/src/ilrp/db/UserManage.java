@@ -51,8 +51,8 @@ public class UserManage {
 	
 	public static void main(String[] args) {
 		UserManage um = new UserManage();
-		um.users.add(new User("alice", "000001", true, Calendar.getInstance().getTime(), 1000000));
-		um.users.add(new User("bob", "000002", true, Calendar.getInstance().getTime(), 2000000));
+		um.users.add(new User("alice", "000001", true, Calendar.getInstance().getTime()));
+		um.users.add(new User("bob", "000002", true, Calendar.getInstance().getTime()));
 		DbAccess.saveUsers(um);
 		um = DbAccess.loadUsers();
 	}

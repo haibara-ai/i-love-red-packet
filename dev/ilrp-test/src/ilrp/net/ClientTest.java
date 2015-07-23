@@ -12,6 +12,9 @@ import java.io.IOException;
 import java.util.Calendar;
 
 public class ClientTest {
+	private static final String HOST = "128.199.184.194";
+	private static final int	PORT = 16888;
+	
 	public static class EchoCallback implements Callback {
 		@Override
 		public void invoke(byte status, Request req, Response res) {
@@ -20,17 +23,16 @@ public class ClientTest {
 		}
 	}
 
-	public static void main(String[] args) throws ClassNotFoundException, IOException {
-		IlrpServer server = new IlrpServer();
-		server.start();
-
+	public static void main(String[] args) throws ClassNotFoundException, IOException, InterruptedException {
 		EchoCallback echo = new EchoCallback();
 		IlrpClient client = new IlrpClient();
-		client.openConnection();
+		client.openConnection(HOST, PORT);
 		
+		System.out.println("authorizing...");
 		AuthRequest r1 = new AuthRequest("000001", Calendar.getInstance().getTime());
 		client.authorize(r1);
 		
+		System.out.println("sending...");
 		IncomeRequest r2 = new IncomeRequest(
 				IncomeRequest.RECEIVE_PUBLIC_RED_PACKET, 
 				10000, 
@@ -40,6 +42,7 @@ public class ClientTest {
 				);
 		client.sendMessage(r2, echo);
 
+		System.out.println("sending...");
 		IncomeRequest r3 = new IncomeRequest(
 				IncomeRequest.RECEIVE_PUBLIC_RED_PACKET, 
 				12300, 
@@ -49,6 +52,7 @@ public class ClientTest {
 				);
 		client.sendMessage(r3, echo);
 		
+		System.out.println("sending...");
 		ExpenseRequest r4 = new ExpenseRequest(
 				ExpenseRequest.SEND_RED_PACKET_TO_PUBLIC,
 				40000, 
@@ -59,11 +63,16 @@ public class ClientTest {
 				);
 		client.sendMessage(r4, echo);
 		
+		System.out.println("sending...");
 		MissPacketRequest r5 = new MissPacketRequest(
 				Calendar.getInstance().getTime()
 				);
 		client.sendMessage(r5, echo);
 		
+		Thread.sleep(10000);
+		System.out.println("closing...");
+		client.closeConnection();
+		System.out.println("closed");
 	}
 
 }
