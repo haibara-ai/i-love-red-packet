@@ -28,32 +28,26 @@ public class SmallestRankThreshold {
 //		0.66,
 //		1.00,
 	};
-	
-	private static final double[] DEFAULT_THRESHOLDS = new double[] {
-		0.20,		// round 1
-		0.30,		// round 2
-		0.40,		// round 3
-		1.00,		// round 4
-	};
 
 	public static final double[] THRESHOLDS;
 	
 	// build threshold
 	static {
-		double[] result;
 		try {
+			double[] result;
 			result = new double[COMPLETION_RATIO.length];
 			result[0] = COMPLETION_RATIO[0];
 			// CR[i - 1] + (1 - CR[i - 1]) * T[i] = CR[i]
 			for (int i = 1; i < result.length; i++) {
 				result[i] = (COMPLETION_RATIO[i] - COMPLETION_RATIO[i - 1]) / (1 - COMPLETION_RATIO[i - 1]);
 			}
+			THRESHOLDS = result;
+			printThreshold();
 		} catch (Exception e) {
-			System.err.println("Warning: using default threshold for decision making, due to the exception: " + e.getMessage());
-			result = DEFAULT_THRESHOLDS;
+			e.printStackTrace();
+			throw new RuntimeException(
+					"Exception when computing the rank threshold, fix it first." + e.getMessage());
 		}
-		THRESHOLDS = result;
-		printThreshold();
 	}
 
 	public static void printThreshold() {

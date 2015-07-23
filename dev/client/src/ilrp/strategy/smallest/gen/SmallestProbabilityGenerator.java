@@ -10,9 +10,9 @@ import java.io.IOException;
 public class SmallestProbabilityGenerator {
 	// each block has xxx duplication samples in average
 	// use 10000000 for accuracy
-	private static final long AVERAGE_DUPLICATION = 10000;
+	private static final long AVERAGE_DUPLICATION = 1000000;
 	// resolution
-	private static final int M = 100;
+	private static final int M = 400;
 	// total amount
 	private static final double total = GameParam.TOTAL;
 	// total partitions
@@ -46,6 +46,7 @@ public class SmallestProbabilityGenerator {
 		StringBuilder sb = new StringBuilder();
 		sb.append("package ilrp.strategy.smallest.data;\n");
 		sb.append("\n");
+		sb.append("// *** Automatic generated file, do not edit ***\n");
 		sb.append("public class SmallestProbility {\n");
 		sb.append("\t// resolution is: resolution = amount / M\n");
 		sb.append("\tpublic static final int M = " + M + ";\n");
@@ -70,6 +71,7 @@ public class SmallestProbabilityGenerator {
 	}
 	
 	public static void main(String[] args) throws IOException {
+		long start = System.currentTimeMillis();
 		File file = new File("./data/table.txt");
 		if (!file.getParentFile().exists())
 			file.getParentFile().mkdirs();
@@ -79,5 +81,6 @@ public class SmallestProbabilityGenerator {
 		FileWriter writer = new FileWriter(file);
 		writer.write(s);
 		writer.close();
+		System.out.println("time=" + (System.currentTimeMillis() - start) + "ms.");
 	}
 }

@@ -31,12 +31,6 @@ public class SmallestRankGenerator {
 		}
 		// sort
 		Arrays.sort(raw);
-//		// reverse
-//		for (int i = 0, j = 0; i < (j = raw.length - i - 1); i++) {
-//			double temp = raw[i];
-//			raw[i] = raw[j];
-//			raw[j] = temp;
-//		}
 		// resample:
 		// e[0] = raw[0];
 		// e[last] = raw[last'];
@@ -58,6 +52,7 @@ public class SmallestRankGenerator {
 		// P(S) is obtained from SmallestProbility
 		// let E = (x1+x2-1)*P(S) + (x1+x2)*P(not S)
 		// this is a collection of evenly sample E
+		sb.append("// *** Automatic generated file, do not edit ***\n");
 		sb.append("// assume x1+x2+x3+x4=1\n");
 		sb.append("// let event S = min(x1,x2) < min(x3,x4)\n");
 		sb.append("// P(S) is obtained from SmallestProbility\n");
@@ -76,6 +71,7 @@ public class SmallestRankGenerator {
 	}
 	
 	public static void main(String[] args) throws IOException {
+		long start = System.currentTimeMillis();
 		File file = new File("./data/rank.txt");
 		if (!file.getParentFile().exists())
 			file.getParentFile().mkdirs();
@@ -85,5 +81,6 @@ public class SmallestRankGenerator {
 		FileWriter writer = new FileWriter(file);
 		writer.write(s);
 		writer.close();
+		System.out.println("time = " + (System.currentTimeMillis() - start) + "ms.");
 	}
 }
