@@ -37,7 +37,7 @@ public class IlrpServer extends Thread {
 	
 	public static void main(String[] args) {
 		try {
-			int port = Integer.parseInt(args[1]);
+			int port = Integer.parseInt(args[0]);
 			IlrpServer server = new IlrpServer(port);
 			server.start();
 		} catch (Exception e) {
