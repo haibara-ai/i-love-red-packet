@@ -1,11 +1,15 @@
 package ilrp.strategy.smallest;
 
 import ilrp.strategy.smallest.data.SmallestProbility;
-import ilrp.strategy.smallest.data.SmallestRank;
-
-import java.util.Arrays;
 
 public class GameUtil {
+	// 最多玩家
+	public static final int MIN_PLAYERS = 4;
+	// 最少玩家
+	public static final int MAX_PLAYERS = 5;
+	// 最大抽水, 10%
+	public static final int MAX_TAX 	= 10;
+	
 	/**
 	 * Red Packet to String
 	 * @param x
@@ -24,33 +28,18 @@ public class GameUtil {
 	}
 	
 	/**
-	 * assume x1 + x2 + x3 + x4 = total
-	 * let S = min(x1, x2) < min(x3, x4)
-	 * compute: (x1+x2-total)*P(S) + (x1+x2)*P(not S)
+	 * NOTE: all values are unified with respect to the amount (1.0).
+	 * assume sigma_i x_i = 1
+	 * if S = min(x1, x2) < min(others) happens, penalty is 'penalty' (usually, amount + penalty < 0)
+	 * compute: (x1+x2-penalty)*P(S) + (x1+x2)*P(not S)
 	 * @param x1
 	 * @param x2
 	 * @return
 	 */
-	public static double expectation(double x1, double x2, double total) {
-		int i = (int) (x1 / total * SmallestProbility.M);
-		int j = (int) (x2 / total * SmallestProbility.M);
-		double p = SmallestProbility.DATA[i][j];
-		return (x1 + x2 - total) * p + (x1 + x2) * (1 - p);
+	public static double expectation(int n, int tax, double p1, double p2) {
+		double penalty = 1 / (1 - tax / 100.0);
+		double p = SmallestProbility.getValue(n, p1, p2);
+		return (p1 + p2 - penalty) * p + (p1 + p2) * (1 - p);
 	}
 	
-
-	/**
-	 * compute rank of the current solution
-	 * i.e. return = 0.1 => it's among the best 10%.
-	 * @param x1
-	 * @param x2
-	 * @param total
-	 * @return
-	 */
-	public static double rank(double x1, double x2, double total) {
-		double exp = expectation(x1 / total, x2 / total, 1);
-		int index = Arrays.binarySearch(SmallestRank.SAMPLES, exp);
-		int position = (index >= 0) ? index : -(index + 1);	// [0, lenfth]
-		return 1.0 - 1.0 * position / SmallestRank.SAMPLES.length;
-	}
 }

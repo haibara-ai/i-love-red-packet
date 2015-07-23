@@ -12,13 +12,18 @@ import java.util.Random;
  */
 public class SmallestDecisionSimulator {
 	// assume we can join in 80% games
-	public static final double 	PARTICIPATION 	= 0.50;
+	public static final double 	PARTICIPATION 	= 0.80;
 	public static final double 	amount 			= 100;
 	public static final int 	n 				= 4;
+	public static final int 	tax 			= 10;
 	private static final int 	MAX_ROUND 		= 10;
-	private static final int 	MAX_ITERATION	= 10000;
+	private static final int 	MAX_ITERATION	= 100;
 	
-	public static void main(String[] args) {
+	public static void main(String[] args) throws ClassNotFoundException {
+//		ClassLoader.getSystemClassLoader().loadClass(SmallestProbility.class.getName());
+//		ClassLoader.getSystemClassLoader().loadClass(SmallestRank.class.getName());
+//		ClassLoader.getSystemClassLoader().loadClass(SmallestRankThreshold.class.getName());
+		
 		long seed = 1;
 		Random rand = new Random(seed);
 		RedPacketGenerator.setSeed(seed);
@@ -42,7 +47,7 @@ public class SmallestDecisionSimulator {
 					round++;
 					rp = RedPacketGenerator.generate(amount, n);
 					System.out.println(String.format("Try %d: %s", round, GameUtil.redPacketToString(rp)));
-				} while (!decision.decide(round, rp[0], rp[1], amount));
+				} while (!decision.decide(round, n, tax, rp[0], rp[1], amount));
 				rounds[round] ++;
 				System.out.println("OK, I forward this one.");
 				profit -= amount;
