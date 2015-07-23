@@ -4,6 +4,6 @@
 	<classpathentry kind="src" path="test"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/protocol"/>
-	<classpathentry kind="lib" path="lib/exported.jar"/>
+	<classpathentry kind="lib" path="lib/protocol.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
