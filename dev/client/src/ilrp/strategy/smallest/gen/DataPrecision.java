@@ -12,7 +12,7 @@ public class DataPrecision {
 	// 10000	-> 3min
 	// 100000 	-> 30min
 	// 1000000	-> 5hours
-	public static final long	PROB_AVERAGE_DUPLICATION = 10000;
+	public static final long	PROB_AVERAGE_DUPLICATION = 1000;
 	// 对红包金额的分析精度，100表示精确到总金额的1/100
 	// recommended = 400
 	public static final int 	PROB_DIV 			= 400;
@@ -21,5 +21,5 @@ public class DataPrecision {
 	public static final int 	RANK_SAMPLES 		= 1000;
 	// 计算Rank时，总采样率数量
 	// recommended = 100000000
-	public static final int 	RANK_RAW_SAMPLES 	= 100000000;
+	public static final int 	RANK_RAW_SAMPLES 	= 10000000;
 }

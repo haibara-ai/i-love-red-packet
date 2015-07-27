@@ -7,6 +7,8 @@ public class GameUtil {
 	public static final int MIN_PLAYERS = 4;
 	// 最少玩家
 	public static final int MAX_PLAYERS = 5;
+	// 已参与的玩家数量
+	public static final int[] ACTED_PLAYERS = new int[] {1, 2};  
 	// 抽水百分数
 	public static final int[] TAXES 	= new int[] {
 		0, 5, 10, 15
@@ -38,9 +40,24 @@ public class GameUtil {
 	 * @param x2
 	 * @return
 	 */
-	public static double expectation(int n, int tax, double p1, double p2) {
+	public static double expectation(int tax, int n, double p1, double p2) {
 		double penalty = 1 / (1 - tax / 100.0);
 		double p = SmallestProbility.getValue(n, p1, p2);
 		return (p1 + p2 - penalty) * p + (p1 + p2) * (1 - p);
+	}
+	
+	/**
+	 * NOTE: all values are unified with respect to the amount (1.0).
+	 * assume sigma_i x_i = 1
+	 * if S = x1 < min(others) happens, penalty is 'penalty' (usually, amount + penalty < 0)
+	 * compute: (x1-penalty)*P(S) + (x1)*P(not S)
+	 * @param x1
+	 * @param x2
+	 * @return
+	 */
+	public static double expectation(int tax, int n, double p1) {
+		double penalty = 1 / (1 - tax / 100.0);
+		double p = SmallestProbility.getValue(n, p1);
+		return (p1 - penalty) * p + (p1) * (1 - p);
 	}
 }

@@ -18,11 +18,15 @@ public class SmallestRankThreshold {
 	 * i.e., all red packets are sent in at most 4 rounds
 	 */
 	private static final double[] COMPLETION_RATIO = new double[] {
-		// strategy 1
-		0.20,
-		0.50,
+		// strategy 1 - for single player
+		0.35,
+		0.70,
 		1.00,
-		// strategy 2
+//		// strategy 1 - for double player
+//		0.20,
+//		0.50,
+//		1.00,
+		// strategy 2 - for double player
 //		0.33,
 //		0.50,
 //		0.66,
