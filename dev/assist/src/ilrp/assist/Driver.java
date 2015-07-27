@@ -2,7 +2,7 @@ package ilrp.assist;
 
 import java.awt.image.BufferedImage;
 
-public class Driver {
+public class Driver implements Runnable{
 
 	protected CaptureWindow cw = null;
 	protected AssistRobot ar = null;
@@ -30,16 +30,41 @@ public class Driver {
 		Weixin wx1 = new Weixin();
 		// config wx location
 		this.initWXArea(wx1);
-		
+		if(!wx1.inited()) {
+			return;
+		}
+		System.out.println("1");
+		ar.postRedPacket(wx1,"1","0.02");	
+		ar.delay(500);
+		ar.clickPos(wx1.getWritePageBlankButton());
+		this.clickRedPacket(wx1);
+	}
+	
+	private void clickRedPacket(Weixin wx1) {
+		BufferedImage focusImage = ar.shotScreen(wx1.getArea());
+		System.out.println("get new red packet");
+		long startTime = System.currentTimeMillis();
+		ar.processNewRedPacket(wx1, focusImage);
+		long endTime = System.currentTimeMillis();
+		System.out.println(endTime-startTime);
+	}
+	
+	private void rushRedPacket(Weixin wx1) {
 		BufferedImage focusImage = ar.shotScreen(wx1.getArea());
 		do {
-			System.out.println("once");
 			focusImage = ar.waitForNewRedPacket(wx1, focusImage);
+			
+			System.out.println("get new red packet");
+			long startTime = System.currentTimeMillis();
 			ar.processNewRedPacket(wx1, focusImage);
+			long endTime = System.currentTimeMillis();
+			System.out.println(endTime-startTime);
 			focusImage = ar.waitForChatPage(wx1);
-		} while (true);
+		} while (working);
 	}
-
+	
+	private boolean working = true;
+	
 	public static void main(String[] args) {
 		Driver ad = new Driver();
 		ad.run();

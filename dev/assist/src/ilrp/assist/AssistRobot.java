@@ -131,38 +131,6 @@ public class AssistRobot {
 		return null;
 	}
 
-	// public List<Rectangle> splitWx(BufferedImage image, Rectangle wxArea) {
-	// List<Rectangle> ret = new ArrayList<Rectangle>();
-	// int cenX = wxArea.x + wxArea.width / 2;
-	// int startY = -1;
-	// int endY = -1;
-	// boolean isRedPacket = false;
-	// for (int i = 0; i < wxArea.height; i++) {
-	// int pixelRGB = image.getRGB(cenX, wxArea.y + i);
-	// if (pixelRGB == redPacketBGColor.getRGB()) {
-	// isRedPacket = true;
-	// }
-	// if (pixelRGB != wxBGColor.getRGB()) {
-	// if (startY == -1) {
-	// startY = wxArea.y + i;
-	// }
-	// } else {
-	// if (startY != -1 && endY == -1) {
-	// endY = wxArea.y + i - 1;
-	// // add message rectangle
-	// if (isRedPacket) {
-	// ret.add(new Rectangle(wxArea.x, startY, wxArea.width, endY - startY +
-	// 1));
-	// isRedPacket = false;
-	// }
-	// startY = endY = -1;
-	// }
-	// }
-	// }
-	//
-	// return ret;
-	// }
-
 	public void delay(int ms) {
 		robot.delay(ms);
 	}
@@ -174,7 +142,7 @@ public class AssistRobot {
 	public Point locateOpenRedPacketPos(Weixin wx, BufferedImage image) {
 		for (int i = 0; i < image.getHeight() / 2; i++) {
 			if (image.getRGB(image.getWidth() / 2, image.getHeight() - i - 1) == Weixin.openRedPacketBGColor.getRGB()) {
-				return new Point(wx.getX() + image.getWidth() / 2, wx.getY() + image.getHeight() - i - 4);
+				return new Point(wx.getX() + image.getWidth() / 2, wx.getY() + image.getHeight() - i -1);
 			}
 		}
 		return null;
@@ -210,7 +178,6 @@ public class AssistRobot {
 					}
 				}
 			}
-
 			if (bottom != -1 && top != -1) {
 				break;
 			}
@@ -224,6 +191,9 @@ public class AssistRobot {
 	}
 
 	public void clickPos(Point pos) {
+		if (pos == null) {
+			return;
+		}
 		robot.mouseMove(pos.x, pos.y);
 		robot.mousePress(InputEvent.BUTTON1_MASK);
 		robot.mouseRelease(InputEvent.BUTTON1_MASK);
@@ -236,6 +206,8 @@ public class AssistRobot {
 				return true;
 			}
 		}
+		// test if is opened redpacket
+		
 		return false;
 	}
 
@@ -250,15 +222,43 @@ public class AssistRobot {
 	}
 
 	public boolean getRedPacketPage(BufferedImage image) {
-		int wxCentralX = image.getWidth() / 2;
 		for (int i = 0; i < image.getHeight() / 2; i++) {
-			if (image.getRGB(wxCentralX, i) == Weixin.redPacketPageColor.getRGB()) {
+			if (image.getRGB(image.getWidth() / 2, i) == Weixin.redPacketPageColor.getRGB()) {
 				return true;
 			}
 		}
 		return false;
 	}
-
+	
+	public void postRedPacket(Weixin wx, String count, String amount) {
+		System.out.println(wx.getPostButton().getX() + wx.getPostButton().getY());
+		this.clickPos(wx.getPostButton());
+		this.delay(200);
+		this.clickPos(wx.getRedPacketButton());
+		this.delay(500);
+		this.clickPos(wx.getRedCountTextField());
+		this.delay(500);
+		this.inputNumber(wx, count);
+		this.clickPos(wx.getFoldKeybroadButton());
+		this.delay(200);		
+		this.clickPos(wx.getRedAmountTextField());
+		this.delay(500);
+		this.inputNumber(wx, amount);
+		this.clickPos(wx.getFoldKeybroadButton());
+		this.delay(500);
+		this.clickPos(wx.getSetupRedPacketButton());
+		this.delay(1000);
+		this.clickPos(wx.getInjectRedPacketButton());
+	}
+	
+	public void inputNumber(Weixin wx, String number) {
+		for (int i = 0 ; i < number.length(); i++) {
+			System.out.println(number.charAt(i));
+			System.out.println(wx.getKeyPoint(number.charAt(i)+"").getX()+":"+wx.getKeyPoint(number.charAt(i)+"").getY());
+			this.clickPos(wx.getKeyPoint(number.charAt(i)+""));
+		}
+	}
+	
 	public static void main(String... args) {
 		AssistRobot ar = new AssistRobot();
 	}
