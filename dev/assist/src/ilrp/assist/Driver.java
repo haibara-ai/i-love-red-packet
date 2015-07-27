@@ -1,6 +1,10 @@
 package ilrp.assist;
 
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+
+import javax.imageio.ImageIO;
 
 public class Driver implements Runnable{
 
@@ -41,7 +45,12 @@ public class Driver implements Runnable{
 	}
 	
 	private void clickRedPacket(Weixin wx1) {
-		BufferedImage focusImage = ar.shotScreen(wx1.getArea());
+		BufferedImage focusImage = ar.waitForChatPage(wx1);
+		try {
+			ImageIO.write(focusImage, "png", new File("D:\\github\\i-love-red-packet\\dev\\assist\\focusImage.png"));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		System.out.println("get new red packet");
 		long startTime = System.currentTimeMillis();
 		ar.processNewRedPacket(wx1, focusImage);
