@@ -38,9 +38,9 @@ public class Driver implements Runnable{
 			return;
 		}
 		System.out.println("1");
-		ar.postRedPacket(wx1,"1","0.02");	
-		ar.delay(500);
-		ar.clickPos(wx1.getWritePageBlankButton());
+		ar.postRedPacket(wx1,"2","0.02");	
+//		ar.delay(500);
+//		ar.clickPos(wx1.getWritePageBlankButton());
 		this.clickRedPacket(wx1);
 	}
 	
@@ -54,6 +54,11 @@ public class Driver implements Runnable{
 		System.out.println("get new red packet");
 		long startTime = System.currentTimeMillis();
 		ar.processNewRedPacket(wx1, focusImage);
+		ar.clickPos(wx1.getTransferRedPacketButton());
+		ar.delay(100);
+		ar.clickPos(wx1.getTop1GroupLocation());
+		ar.delay(300);
+		ar.clickPos(wx1.getSendTransferRedPacketButton());
 		long endTime = System.currentTimeMillis();
 		System.out.println(endTime-startTime);
 	}
@@ -66,6 +71,7 @@ public class Driver implements Runnable{
 			System.out.println("get new red packet");
 			long startTime = System.currentTimeMillis();
 			ar.processNewRedPacket(wx1, focusImage);
+			ar.backWX(wx1.getArea());
 			long endTime = System.currentTimeMillis();
 			System.out.println(endTime-startTime);
 			focusImage = ar.waitForChatPage(wx1);

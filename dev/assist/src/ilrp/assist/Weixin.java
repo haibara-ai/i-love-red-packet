@@ -37,7 +37,11 @@ public class Weixin {
 	private Point setupRedPacketButton = null;
 	private Point injectRedPacketButton = null;
 	private Point writePageBlankButton = null;
-	
+	private Point openRedPacketButton = null;
+	private Point transferRedPacketButton = null;
+	private Point top1GroupLocation = null;
+	private Point sendTransferRedPacketButton = null;
+
 	public Weixin() {
 		
 	}
@@ -80,7 +84,10 @@ public class Weixin {
 		
 		this.setupRedPacketButton = new Point(x+fullWidth/2,y+height*17/23);
 		this.injectRedPacketButton = new Point(x+fullWidth/2,y+height*11/23);
-		
+		this.transferRedPacketButton = new Point(x+fullWidth/2,y+height*20/23);
+		this.openRedPacketButton = new Point(x+fullWidth/2,y+height*16/23);
+		this.top1GroupLocation = new Point(x+fullWidth/2,y+height*7/23);
+		this.sendTransferRedPacketButton = new Point(x+fullWidth*11/16,y+height*16/23);
 	}
 	
 	public boolean inited() {
@@ -93,6 +100,10 @@ public class Weixin {
 	
 	public Point getPostButton() {
 		return this.postButton;
+	}
+	
+	public Point getOpenRedPacketButton() {
+		return this.openRedPacketButton;
 	}
 	
 	public Point getFoldKeybroadButton() {
@@ -111,8 +122,16 @@ public class Weixin {
 		return this.redAmountTextField;
 	}
 	
+	public Point getTop1GroupLocation() {
+		return this.top1GroupLocation;
+	}
+	
 	public Point getKeyPoint(String key) {
 		return this.keybroadButton.get(key);
+	}
+	
+	public Point getSendTransferRedPacketButton() {
+		return this.sendTransferRedPacketButton;
 	}
 	
 	public Point getSetupRedPacketButton() {
@@ -125,6 +144,10 @@ public class Weixin {
 	
 	public Point getWritePageBlankButton() {
 		return this.writePageBlankButton;
+	}
+	
+	public Point getTransferRedPacketButton() {
+		return this.transferRedPacketButton;
 	}
 	
 	public void init(Point imageLocation, BufferedImage image) {

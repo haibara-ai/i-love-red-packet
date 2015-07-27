@@ -90,8 +90,7 @@ public class AssistRobot {
 			focusImage = this.shotScreen(wx.getArea());
 		} while (!this.getOpenRedPacketPage(focusImage));
 
-		Point openRedPacketPos = this.locateOpenRedPacketPos(wx, focusImage);
-		this.clickPos(openRedPacketPos);
+		this.clickPos(wx.getOpenRedPacketButton());
 		do {
 			try {
 				Thread.sleep(100);
@@ -104,7 +103,6 @@ public class AssistRobot {
 		Rectangle redPacketArea = this.extractRedPacketArea(focusImage);
 		this.recognize(
 				focusImage.getSubimage(redPacketArea.x, redPacketArea.y, redPacketArea.width, redPacketArea.height));
-		this.backWX(wx.getArea());
 	}
 
 	public BufferedImage waitForChatPage(Weixin wx) {
