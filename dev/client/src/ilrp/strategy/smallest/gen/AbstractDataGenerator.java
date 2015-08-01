@@ -11,7 +11,7 @@ public class AbstractDataGenerator {
 		return DATA_DIR;
 	}
 	
-	protected static String matrixToText(double[][] t) {
+	public static String matrixToText(double[][] t) {
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < t.length; i++) {
 			double[] r = t[i];
@@ -24,7 +24,7 @@ public class AbstractDataGenerator {
 		return sb.toString();
 	}
 
-	protected static String arrayToColumn(double[] t) {
+	public static String arrayToColumn(double[] t) {
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < t.length; i++) {
 			sb.append(String.format("%1.4f", t[i]));
@@ -33,14 +33,14 @@ public class AbstractDataGenerator {
 		return sb.toString();
 	}
 
-	protected static void ensureFile(File file) throws IOException {
+	public static void ensureFile(File file) throws IOException {
 		if (!file.getParentFile().exists())
 			file.getParentFile().mkdirs();
 		if (!file.exists())
 			file.createNewFile();
 	}
 
-	protected static void writeToFile(File file, String s) throws IOException {
+	public static void writeToFile(File file, String s) throws IOException {
 		FileWriter writer = new FileWriter(file);
 		writer.write(s);
 		writer.close();

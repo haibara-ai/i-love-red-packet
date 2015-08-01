@@ -18,6 +18,8 @@ public class SmallestDecisionSimulator {
 	public static final int 	tax 			= 10;
 	private static final int 	MAX_ROUND 		= 10;
 	private static final int 	MAX_ITERATION	= 1000;
+	// possible acted players
+	private static final int[] 	ACTED_PLAYERS	= new int[] {1};
 	
 	public static void main(String[] args) throws ClassNotFoundException {
 //		ClassLoader.getSystemClassLoader().loadClass(SmallestProbility.class.getName());
@@ -38,16 +40,26 @@ public class SmallestDecisionSimulator {
 		int[] rounds = new int[MAX_ROUND];
 		
 		for (int iter = 0; iter < MAX_ITERATION; iter ++) {
+			int acted = 0;
 			// if I am still the dealer, I should deliver a red packet
 			if (iAmDealer) {
 				dealerTimes++;
 				System.out.println("Hacking the system.");
 				int round = -1;
+				boolean decided = false;
 				do {
 					round++;
 					rp = RedPacketGenerator.generate(amount, n);
-					System.out.println(String.format("Try %d: %s", round, GameUtil.redPacketToString(rp)));
-				} while (!decision.decide(round, n, tax, rp[0], rp[1], amount));
+					acted = ACTED_PLAYERS[rand.nextInt(ACTED_PLAYERS.length)];
+					System.out.println(String.format("Try %d (act=%d): %s", round, acted, GameUtil.redPacketToString(rp)));
+					if (acted == 1) {
+						decided = decision.decide1(round, n, tax, rp[0], amount);
+					} else if (acted == 2) {
+						decided = decision.decide2(round, n, tax, rp[0], rp[1], amount);
+					} else {
+						throw new RuntimeException();
+					}
+				} while (!decided);
 				rounds[round] ++;
 				System.out.println("OK, I forward this one.");
 				profit -= amount;
@@ -64,23 +76,35 @@ public class SmallestDecisionSimulator {
 			// race for the rp
 			if (iAmDealer) {
 				// I must be in the game
-				profit = profit + rp[0] + rp[1];
 				amountAll += amount;
 				amountJoined += amount;
-				System.out.println(String.format("I got: %6.2f and %6.2f", rp[0], rp[1]));
-				iAmDealer = (rp[0] <= min + 1e-8 || rp[1] <= min + 1e-8);
-				if (iAmDealer)
-					System.out.println("Oops... I am still the dealer.");
+				if (acted == 1) {
+					profit = profit + rp[0];
+					System.out.println(String.format("I got: %6.2f", rp[0]));
+					iAmDealer = (rp[0] <= min + 1e-8);
+					if (iAmDealer)
+						System.out.println("Oops... I am still the dealer.");
+				} else if (acted == 2) {
+					profit = profit + rp[0] + rp[1];
+					System.out.println(String.format("I got: %6.2f and %6.2f", rp[0], rp[1]));
+					iAmDealer = (rp[0] <= min + 1e-8 || rp[1] <= min + 1e-8);
+					if (iAmDealer)
+						System.out.println("Oops... I am still the dealer.");
+				} else {
+					throw new RuntimeException();
+				}
 			} else {
 				int i1 = -1;
-				int i2 = -1;
 				if (rand.nextDouble() < PARTICIPATION) {
 					i1 = rand.nextInt(n);
 				}
-				if (rand.nextDouble() < PARTICIPATION) {
-					do {
-						i2 = rand.nextInt(n);
-					} while (i2 == i1);
+				int i2 = -1;
+				if (acted == 2) {
+					if (rand.nextDouble() < PARTICIPATION) {
+						do {
+							i2 = rand.nextInt(n);
+						} while (i2 == i1);
+					}
 				}
 				amountAll += amount;
 				if (i1 == -1 && i2 == -1) {
