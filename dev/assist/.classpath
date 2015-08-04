@@ -6,5 +6,6 @@
 	<classpathentry kind="lib" path="lib/jai_imageio.jar"/>
 	<classpathentry kind="lib" path="lib/jna.jar"/>
 	<classpathentry kind="lib" path="lib/tess4j.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/client"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
