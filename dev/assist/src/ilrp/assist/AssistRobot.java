@@ -24,6 +24,7 @@ public class AssistRobot {
 	public AssistRobot() {
 		try {
 			robot = new Robot();
+			robot.setAutoWaitForIdle(true);
 		} catch (AWTException e) {
 			e.printStackTrace();
 		}
@@ -77,11 +78,7 @@ public class AssistRobot {
 		BufferedImage newImage = null;
 		do {
 			newImage = this.shotScreen(wx.getArea());
-			try {
-				Thread.sleep(10);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
+			this.delay(30);
 		} while (this.assertSameImage(baseImage, newImage) || this.getLatestRedPacketPoint(wx, newImage) == null);
 		return newImage;
 	}
@@ -91,11 +88,7 @@ public class AssistRobot {
 		this.clickPos(clickRedPacketPoint);
 		boolean openedRedPacket = false;
 		do {
-			try {
-				Thread.sleep(50);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
+			this.delay(50);
 			focusImage = this.shotScreen(wx.getArea());
 			if (this.assertOpenRedPacketPage(focusImage)) {
 				openedRedPacket = false;
@@ -116,11 +109,7 @@ public class AssistRobot {
 			do {
 				transferButton = wx.getTransferRedPacketButton(focusImage);
 				focusImage = this.shotScreen(wx.getArea());
-				try {
-					Thread.sleep(50);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
+				this.delay(50);
 			} while ((transferButton.getY()-wx.getY()) < wx.getHeight() / 2);
 			this.clickPos(transferButton);
 			this.waitForTransferRedpacketPage(wx);
@@ -139,16 +128,11 @@ public class AssistRobot {
 		} else {
 			focusImage = waitForRedPacketPage(wx);
 //			this.mouseWheel();
-//			this.robot.waitForIdle();
 			Point transferButton = null;
 			do {
 				transferButton = wx.getTransferRedPacketButton(focusImage);
 				focusImage = this.shotScreen(wx.getArea());
-				try {
-					Thread.sleep(50);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
+				this.delay(50);
 			} while ((transferButton.getY()-wx.getY()) < wx.getHeight() / 2);
 			this.clickPos(transferButton);
 			this.waitForTransferRedpacketPage(wx);
@@ -177,11 +161,7 @@ public class AssistRobot {
 		BufferedImage newImage = this.shotScreen(wx.getTopArea());
 		while (!this.assertTransferRedpacketPage(curImage) || !assertSameImage(curImage, newImage)) {
 			curImage = newImage;
-			try {
-				Thread.sleep(50);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
+			this.delay(50);
 			newImage = this.shotScreen(wx.getTopArea());
 			Debuger.drawPointOnImage(newImage, new Point((int)wx.getWXHomeIconLocation().getX()-wx.getX(), (int)wx.getWXHomeIconLocation().getY()-wx.getY()));
 			Debuger.writeImage(newImage, "transferpage."+System.currentTimeMillis()+".bmp");
@@ -192,27 +172,19 @@ public class AssistRobot {
 	public BufferedImage waitForRedPacketPage(Weixin wx) {
 		BufferedImage focusImage = null;
 		do {
-			try {
-				Thread.sleep(50);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
+			this.delay(50);
 			focusImage = this.shotScreen(wx.getArea());
 		} while (!this.assertRedPacketPage(focusImage));
 		return focusImage;
 	}
 	
-	public Situation processNewRedPacket(Weixin wx, BufferedImage focusImage, boolean openGroup) {
+	public Situation processNewRedPacket(Weixin wx, boolean openGroup, Situation sit) {
 		Debuger.startTimer("process new red packet");
-		Point clickRedPacketPoint = this.getLatestRedPacketPoint(wx, focusImage);
-		this.clickPos(clickRedPacketPoint);
+		BufferedImage focusImage = this.shotScreen(wx.getArea());
+		this.clickPos(this.getLatestRedPacketPoint(wx, focusImage));
 		boolean openedRedPacket = false;
 		do {
-			try {
-				Thread.sleep(50);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
+			this.delay(50);
 			focusImage = this.shotScreen(wx.getArea());
 			if (this.assertOpenRedPacketPage(focusImage)) {
 				openedRedPacket = false;
@@ -230,27 +202,32 @@ public class AssistRobot {
 			openedRedPacket = true;
 		}		
 		Debuger.stopTimer("process new red packet");
-		
-		String myPacket = this.recognize(
+		if (sit == null) {
+			sit = new Situation();
+		}
+		if (sit.getMyPacket() == -1) {
+			String myPacket = this.recognize(
 				focusImage.getSubimage((int)wx.getRedPacketArea().getX(),(int)wx.getRedPacketArea().getY(),(int)wx.getRedPacketArea().getWidth(),(int)wx.getRedPacketArea().getHeight()),true);
+			sit.setMyPacket(Float.parseFloat(myPacket));			
+		}
 		this.mouseDrag(wx.getX()+wx.getFullWidth()/2, wx.getY()+wx.getHeight(), wx.getX()+wx.getFullWidth()/2, wx.getY());
-		Situation sit = this.parseRedPacketPage(wx, this.waitForStaticPage(wx));
+		this.parseRedPacketPage(wx, this.waitForStaticPage(wx), sit, openGroup);
+		
 		if (openGroup) {
 			while (!sit.getOver()) {
 				this.backWX(wx);
-				focusImage = this.waitForChatPage(wx);
-				sit = this.processNewRedPacket(wx, focusImage, openGroup);
+				this.waitForChatPage(wx);
+				sit = this.processNewRedPacket(wx, openGroup, sit);
 			}
 		} else {
 			System.out.println("small group " + sit.toString());
 			while (sit.getPacketsCount() != 2) {
 				this.backWX(wx);
-				focusImage = this.waitForChatPage(wx);
-				sit = this.processNewRedPacket(wx, focusImage, openGroup);
+				this.waitForChatPage(wx);
+				sit = this.processNewRedPacket(wx, openGroup, sit);
 			}
 		}
-		
-		sit.setMyPacket(Float.parseFloat(myPacket));
+
 		return sit;
 	}
 	
@@ -271,11 +248,7 @@ public class AssistRobot {
 		BufferedImage newImage = this.shotScreen(wx.getTopArea());
 		while (!this.assertSearchPage(curImage) || !assertSameImage(curImage, newImage)) {
 			curImage = newImage;
-			try {
-				Thread.sleep(50);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
+			this.delay(50);
 			newImage = this.shotScreen(wx.getTopArea());
 //			Debuger.drawPointOnImage(newImage, new Point((int)wx.getWXHomeIconLocation().getX()-wx.getX(), (int)wx.getWXHomeIconLocation().getY()-wx.getY()));
 //			Debuger.writeImage(newImage, "homepage."+System.currentTimeMillis()+".bmp");
@@ -302,11 +275,7 @@ public class AssistRobot {
 		BufferedImage newImage = this.shotScreen(wx.getArea());
 		while (!this.assertSearchResultPage(curImage) || !assertSameImage(curImage, newImage)) {
 			curImage = newImage;
-			try {
-				Thread.sleep(50);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
+			this.delay(30);
 			newImage = this.shotScreen(wx.getArea());
 			Debuger.drawLineOnImage(newImage,new Point(0,wx.getHeight()*71/462),new Point(wx.getWidth(),wx.getHeight()*71/462));
 			Debuger.writeImage(newImage, "searchResultImage" + System.currentTimeMillis() + ".bmp");
@@ -349,18 +318,26 @@ public class AssistRobot {
 		return false;
 	}
 	
-	public Situation parseRedPacketPage(Weixin wx, BufferedImage image) {
-		Situation ret = new Situation();
+	public void parseRedPacketPage(Weixin wx, BufferedImage image, Situation sit, boolean openGroup) {
+		if (sit == null) {
+			sit = new Situation();
+		}
+		sit.clearPackets();
+		boolean isOver = this.getRedPacketOverState(wx, image);
+		if (openGroup && !isOver) {
+			return;
+		}
 		int top = -1;
 		int bottom = -1;
 		int times = 1;
-		Graphics2D g2d = (Graphics2D) image.getGraphics();
-		g2d.setColor(Color.red);
+//		Graphics2D g2d = (Graphics2D) image.getGraphics();
+//		g2d.setColor(Color.red);
 //		try {
 //			ImageIO.write(image, "bmp", new File("D:\\github\\i-love-red-packet\\dev\\assist\\aaa"+times+".bmp"));
 //		} catch (IOException e) {
 //			e.printStackTrace();
 //		}		
+		
 		int startX = wx.getFullWidth()/2;
 		for (int i = wx.getHeight() - 1; i>=0 ;i--) {
 			if (image.getRGB(startX, i) == Weixin.whiteColor.getRGB()) {
@@ -371,23 +348,20 @@ public class AssistRobot {
 				if (bottom != -1) {
 					top = i+1;
 					BufferedImage focusImage = this.shotScreen(wx.getX()+wx.getFullWidth()*2/3,wx.getY()+top,wx.getFullWidth()/3-wx.getHeight()*29/460,(bottom - top) / 2);
-					g2d.drawRect(wx.getFullWidth()*2/3,top,wx.getFullWidth()/3-wx.getHeight()*7/115, bottom - top);
-					try {
-						ImageIO.write(focusImage, "png", new File("D:\\github\\i-love-red-packet\\dev\\assist\\test"+times+".png"));
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-					times++;
-					focusImage = OCRTask.shrinkImage(focusImage, 2.0);
-					String regret = OCRTask.recognize(focusImage,false);
-					System.out.println(regret);
+//					g2d.drawRect(wx.getFullWidth()*2/3,top,wx.getFullWidth()/3-wx.getHeight()*7/115, bottom - top);
+//					try {
+//						ImageIO.write(focusImage, "png", new File("D:\\github\\i-love-red-packet\\dev\\assist\\test"+times+".png"));
+//					} catch (IOException e) {
+//						e.printStackTrace();
+//					}
+//					times++;
+					String regret = OCRTask.recognize(OCRTask.shrinkImage(focusImage, 2.0),false);
 					if (regret.indexOf('.') == -1) {
 						regret = regret.replace(" ", ".");
 					} else {
 						regret = regret.replace(" ", "");
 					}
-					System.out.println(regret);
-					ret.addRedpacket(Float.parseFloat(regret));
+					sit.addRedpacket(Float.parseFloat(regret));
 					bottom = top = -1;
 					if (image.getRGB(wx.getFullWidth()/2, i-2) != Weixin.whiteColor.getRGB()) {
 						break;
@@ -396,15 +370,14 @@ public class AssistRobot {
 				
 			}
 		}
-		g2d.dispose();
-		ret.setOver(this.getRedPacketOverState(wx, image));
+//		g2d.dispose();
+
 //		try {
 //			ImageIO.write(image, "png", new File("D:\\github\\i-love-red-packet\\dev\\assist\\bbbb.png"));
 //		} catch (IOException e) {
 //			e.printStackTrace();
 //		}
 		
-		return ret;
 	}
 	
 	public static void writeImage(BufferedImage image, String filename) {
@@ -432,11 +405,7 @@ public class AssistRobot {
 		Debuger.writeImage(newImage, "homepage.bmp");		
 		while (!this.assertWXHomePage(wx, curImage) || !assertSameImage(curImage, newImage)) {
 			curImage = newImage;
-			try {
-				Thread.sleep(50);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
+			this.delay(50);
 			newImage = this.shotScreen(wx.getAreaWithBottom());
 //			Debuger.drawPointOnImage(newImage, new Point((int)wx.getWXHomeIconLocation().getX()-wx.getX(), (int)wx.getWXHomeIconLocation().getY()-wx.getY()));
 //			Debuger.writeImage(newImage, "homepage."+System.currentTimeMillis()+".bmp");
@@ -459,25 +428,20 @@ public class AssistRobot {
 		BufferedImage newImage = this.shotScreen(wx.getArea());
 		while (!this.assertWXChatPage(curImage) || !assertSameImage(curImage, newImage)) {
 			curImage = newImage;
-			try {
-				Thread.sleep(10);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
+			this.delay(10);
 			newImage = this.shotScreen(wx.getArea());
 		}
 		return newImage;
 	}
 	
-	public Situation clickRedPacket(Weixin wx1) {
-		BufferedImage focusImage = this.waitForChatPage(wx1);
-		System.out.println("get new red packet");
-		this.processNewRedPacket(wx1, focusImage, false);	
-		this.robot.waitForIdle();
-		this.mouseDrag(wx1.getX()+wx1.getFullWidth()/2, wx1.getY()+wx1.getHeight(), wx1.getX()+wx1.getFullWidth()/2, wx1.getY());
-		this.waitForStaticPage(wx1);
-		return this.parseRedPacketPage(wx1, this.shotScreen(wx1.getArea()));
-	}
+//	public Situation clickRedPacket(Weixin wx1) {
+//		this.waitForChatPage(wx1);
+//		System.out.println("get new red packet");
+//		this.processNewRedPacket(wx1, false);	
+//		this.mouseDrag(wx1.getX()+wx1.getFullWidth()/2, wx1.getY()+wx1.getHeight(), wx1.getX()+wx1.getFullWidth()/2, wx1.getY());
+//		this.waitForStaticPage(wx1);
+//		return this.parseRedPacketPage(wx1, this.shotScreen(wx1.getArea()));
+//	}
 	
 	public void mouseDrag(int startX, int startY, int endX, int endY) {
 		this.robot.mouseMove(startX, startY);
@@ -486,31 +450,27 @@ public class AssistRobot {
 		this.robot.mouseRelease(KeyEvent.BUTTON1_MASK);
 	}
 	
-	public void directTransferRedPacket(Weixin wx1) {
-		BufferedImage focusImage = this.waitForChatPage(wx1);
-		this.processNewRedPacket(wx1, focusImage, false);		
-	}
+//	public void directTransferRedPacket(Weixin wx1) {
+//		this.waitForChatPage(wx1);
+//		this.processNewRedPacket(wx1, false);		
+//	}
 	
-	public void openAndTransferRedPacket(Weixin wx1) {
-		this.clickRedPacket(wx1);
-		// transfer red packet
-		this.clickPos(wx1.getTransferRedPacketButton());
-		this.delay(100);
-		this.clickPos(wx1.getRedPacketTop1GroupLocation());
-		this.delay(300);
-		this.clickPos(wx1.getSendTransferRedPacketButton());
-	}
+//	public void openAndTransferRedPacket(Weixin wx1) {
+//		this.clickRedPacket(wx1);
+//		// transfer red packet
+//		this.clickPos(wx1.getTransferRedPacketButton());
+//		this.delay(100);
+//		this.clickPos(wx1.getRedPacketTop1GroupLocation());
+//		this.delay(300);
+//		this.clickPos(wx1.getSendTransferRedPacketButton());
+//	}
 	
 	public boolean waitForPayPage(Weixin wx) {
 		BufferedImage curImage = null;
 		BufferedImage newImage = this.shotScreen(wx.getArea());
 		while (!this.getWXPayPage(wx, curImage) || !assertSameImage(curImage, newImage)) {
 			curImage = newImage;
-			try {
-				Thread.sleep(10);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
+			this.delay(10);
 			newImage = this.shotScreen(wx.getArea());
 		}
 		return true;
@@ -531,11 +491,7 @@ public class AssistRobot {
 		BufferedImage newImage = this.shotScreen(wx.getArea());
 		while (!this.getWXSetupRedPacketPage(wx, curImage) || !assertSameImage(curImage, newImage)) {
 			curImage = newImage;
-			try {
-				Thread.sleep(10);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
+			this.delay(10);
 			newImage = this.shotScreen(wx.getArea());
 		}
 		return true;
@@ -555,7 +511,7 @@ public class AssistRobot {
 		Debuger.startTimer("test get latest red packet");
 		for (int i = image.getHeight() - 1; i >= 0; i--) {
 			if (image.getRGB(image.getWidth() / 2, i) == Weixin.redPacketBGColor.getRGB()) {
-				return new Point(wx.getX() + image.getWidth() / 2, wx.getY() + i);
+				return new Point(wx.getX() + image.getWidth() / 2, wx.getY() + i - 10);
 			}
 		}
 		Debuger.stopTimer("test get latest red packet");
@@ -630,8 +586,7 @@ public class AssistRobot {
 		robot.mouseMove(pos.x, pos.y);
 		robot.mousePress(InputEvent.BUTTON1_MASK);
 		robot.mouseRelease(InputEvent.BUTTON1_MASK);
-	}
-	
+	}	
 	
 	
 	public boolean assertOpenRedPacketPage(BufferedImage image) {
@@ -653,7 +608,7 @@ public class AssistRobot {
 		if (image == null) {
 			return false;
 		}
-		if (image.getRGB(1, 1) == Weixin.wxBGColor.getRGB()) {
+		if (image.getRGB(1, image.getHeight()-2) == Weixin.wxBGColor.getRGB()) {
 			return true;
 		}
 		return false;

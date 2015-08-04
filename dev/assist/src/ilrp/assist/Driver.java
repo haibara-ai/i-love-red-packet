@@ -1,13 +1,17 @@
 package ilrp.assist;
 
+import java.awt.Point;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 import javax.imageio.ImageIO;
 import javax.swing.text.StyleContext.SmallAttributeSet;
 
 import ilrp.strategy.smallest.SmallestDecision;
+import ilrp.ui.assist.Rectangle;
+import ilrp.ui.assist.WindowUtil;
 
 public class Driver implements Runnable{
 
@@ -21,6 +25,7 @@ public class Driver implements Runnable{
 	public Driver() {
 		ar = new AssistRobot();
 	}
+	
 	
 	private void initWXArea(Weixin wx) {
 		cw = new CaptureWindow();
@@ -38,13 +43,44 @@ public class Driver implements Runnable{
 	}
 	
 	public void run() {
-		wx1 = new Weixin("alice");
-		// config wx location
-		this.initWXArea(wx1);
-		if(!wx1.inited()) {
-			System.err.println("Weixin1 initialized error");
+		
+		List<Rectangle> simulators = WindowUtil.locateWindow("º£ÂíÍæ", false);
+		// if simulator.count == 2, left is alice, right is bob
+		// if simulator.count == 1, it is alice
+		if (simulators.size() == 1) {
+			Rectangle s1 = simulators.get(0);
+			wx1 = new Weixin("alice");			
+			wx1.init(new Point(s1.left,s1.top),ar.shotScreen(s1.left,s1.top,s1.right-s1.left+1,s1.bottom-s1.top+1));
+			if(!wx1.inited()) {
+				System.err.println("Weixin1 initialized error");
+				return;
+			}
+		} else if (simulators.size() == 2) {			
+			Rectangle s1 = simulators.get(0);
+			Rectangle s2 = simulators.get(1);
+			if (simulators.get(0).left < simulators.get(1).left) {
+				s1 = simulators.get(1);
+				s2 = simulators.get(0);
+			}
+			wx1 = new Weixin("alice");			
+			wx1.init(new Point(s1.left,s1.top),ar.shotScreen(s1.left,s1.top,s1.right-s1.left+1,s1.bottom-s1.top+1));
+			if(!wx1.inited()) {
+				System.err.println("Weixin1 initialized error");
+				return;
+			}
+			wx2 = new Weixin("bob");			
+			wx2.init(new Point(s2.left,s2.top),ar.shotScreen(s2.left,s2.top,s2.right-s2.left+1,s2.bottom-s2.top+1));
+			if(!wx2.inited()) {
+				System.err.println("Weixin2 initialized error");
+				return;
+			}
+		} else {
+			System.err.println("too many haimawan simulators!");
 			return;
 		}
+		// config wx location
+//		this.initWXArea(wx1);
+
 //		wx2 = new Weixin("bob");
 //		this.initWXArea(wx2);
 //		if (!wx2.inited()) {
@@ -82,9 +118,9 @@ public class Driver implements Runnable{
 //		ar.clickRedPacket(wx1);
 	}
 	
-	public void clickRedPacket(Weixin wx) {
-		ar.clickRedPacket(wx);
-	}
+//	public void clickRedPacket(Weixin wx) {
+//		ar.clickRedPacket(wx);
+//	}
 	
 	public void postRedPacket(Weixin wx, String count, String amount) {
 		ar.postRedPacket(wx, count, amount);
@@ -102,18 +138,17 @@ public class Driver implements Runnable{
 	public boolean shouldTransfer = true;
 	
 	private void rushRedPacket(Weixin wx1, Weixin wx2) {
-		BufferedImage focusImage = ar.shotScreen(wx1.getArea());
-		Situation sit = null;
+//		BufferedImage focusImage = null;
 		boolean firstRound = true;
 		do {
-			ar.delay(1000);
-			focusImage = ar.waitForNewRedPacket(wx1, focusImage);			
+			Situation sit = new Situation();
+			ar.waitForNewRedPacket(wx1, ar.shotScreen(wx1.getArea()));			
 			System.out.println(wx1.getName() + " get new red packet");			
-			sit = ar.processNewRedPacket(wx1, focusImage, true);
+			sit = ar.processNewRedPacket(wx1, true, sit);
 			
-			System.out.println(sit.toString());
+			System.out.println("open group situation:" + sit.toString());
 			ar.backWX(wx1);
-			focusImage = ar.waitForChatPage(wx1);
+			ar.waitForChatPage(wx1);
 			if (sit.getMin() == sit.getMyPacket()) {
 				turnMaster = true;
 			}
@@ -136,14 +171,15 @@ public class Driver implements Runnable{
 //					ar.clickPos(wx1.getTop2ChatGroupLocation());
 					ar.waitForChatPage(wx1);
 					ar.postRedPacket(wx1, n+"", amount+"");
-					ar.delay(100);
+//					ar.delay(100);
 //					ar.backWX(wx2);
 //					ar.clickPos(wx2.getTop2ChatGroupLocation());
 //					ar.clickRedPacket(wx2);
 //					ar.backWX(wx1);
-					sit = ar.processNewRedPacket(wx1, ar.waitForChatPage(wx1), false);
+					sit = new Situation();
+					ar.processNewRedPacket(wx1, false, sit);
 					ar.backWX(wx1);
-					System.out.println(sit.toString());
+					System.out.println("private group situation:"+sit.toString());
 				} while (sd.decide2(round, n, 0, sit.getRedpackets().get(0), sit.getRedpackets().get(1), amount));
 				ar.viewAndTransferRedPacket(wx1, ar.waitForChatPage(wx1), "zhaohongbao");
 				ar.backWX(wx1);

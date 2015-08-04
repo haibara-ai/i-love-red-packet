@@ -68,4 +68,8 @@ public class Situation {
 		sb.append("max packet:"+this.max+"\n");
 		return sb.toString();
 	}
+	
+	public void clearPackets() {
+		this.packets.clear();
+	}
 }

@@ -69,7 +69,7 @@ public class MainFrame {
 				}
 //				driverThread = new Thread(driver);
 //				driverThread.start();
-				driver.clickRedPacket(driver.wx1);
+//				driver.clickRedPacket(driver.wx1);
 				button.setEnabled(false);
 			}
 		});
