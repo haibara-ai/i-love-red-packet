@@ -36,7 +36,7 @@ public class Weixin {
 	public final static Color whiteColor = new Color(255,255,255);
 	public final static Color bestHandColor = new Color(255,172,28);
 	public final static Color HomeIconColor = new Color(69,192,26);
-	public final static Color searchUnderlineColor = new Color(61,156,30);
+	public final static Color searchUnderlineColor = new Color(63,168,29);
 	public final static Color topAreaBGColor = new Color(34,41,44);
 	public final static Color searchResultUnderlineColor = new Color(69,192,26);
 	
@@ -67,7 +67,16 @@ public class Weixin {
 	private Point homeIconLocation = null;
 	private Point searchButton = null;
 	private Point searchedFirstRetLocation = null;
+	private Point mostUsedRetLocation = null;
 	
+	public Point getMostUsedRetLocation() {
+		return mostUsedRetLocation;
+	}
+
+	public void setMostUsedRetLocation(Point mostUsedRetLocation) {
+		this.mostUsedRetLocation = mostUsedRetLocation;
+	}
+
 	public Point getSearchedFirstRetLocation() {
 		return searchedFirstRetLocation;
 	}
@@ -147,7 +156,8 @@ public class Weixin {
 		this.bestHandLocation = height * 72 / 462;		
 		this.homeIconLocation = new Point(x+height*2/23,y+height+height*15/462);		
 		this.searchButton = new Point(x+fullWidth-height*78/460,y-(int)this.getTopArea().getHeight()/2);
-		this.searchedFirstRetLocation = new Point(x + fullWidth/2,y+height*4/23);
+		this.searchedFirstRetLocation = new Point(x + fullWidth/2,y+height*130/462);
+		this.mostUsedRetLocation = new Point(x + fullWidth/2,y+height*80/462);
 	}
 
 	public Rectangle getAreaWithBottom() {

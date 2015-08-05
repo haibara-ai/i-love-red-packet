@@ -84,6 +84,7 @@ public class AssistRobot {
 	}
 
 	public void viewAndTransferRedPacket(Weixin wx, BufferedImage focusImage, String transferGroup) {
+		this.waitForChatPage(wx);
 		Point clickRedPacketPoint = this.getLatestRedPacketPoint(wx, focusImage);
 		this.clickPos(clickRedPacketPoint);
 		boolean openedRedPacket = false;
@@ -180,17 +181,15 @@ public class AssistRobot {
 	
 	public Situation processNewRedPacket(Weixin wx, boolean openGroup, Situation sit) {
 		Debuger.startTimer("process new red packet");
-		BufferedImage focusImage = this.shotScreen(wx.getArea());
-		this.clickPos(this.getLatestRedPacketPoint(wx, focusImage));
+		this.clickPos(this.getLatestRedPacketPoint(wx, this.shotScreen(wx.getArea())));
 		boolean openedRedPacket = false;
 		do {
 			this.delay(50);
-			focusImage = this.shotScreen(wx.getArea());
-			if (this.assertOpenRedPacketPage(focusImage)) {
+			if (this.assertOpenRedPacketPage(this.shotScreen(wx.getArea()))) {
 				openedRedPacket = false;
 				break;
 			}
-			if (this.assertRedPacketPage(focusImage)) {
+			if (this.assertRedPacketPage(this.shotScreen(wx.getArea()))) {
 				openedRedPacket = true;
 				break;
 			}
@@ -198,7 +197,7 @@ public class AssistRobot {
 		
 		if (!openedRedPacket) {
 			this.clickPos(wx.getOpenRedPacketButton());
-			focusImage = waitForRedPacketPage(wx);
+			this.waitForRedPacketPage(wx);
 			openedRedPacket = true;
 		}		
 		Debuger.stopTimer("process new red packet");
@@ -207,17 +206,17 @@ public class AssistRobot {
 		}
 		if (sit.getMyPacket() == -1) {
 			String myPacket = this.recognize(
-				focusImage.getSubimage((int)wx.getRedPacketArea().getX(),(int)wx.getRedPacketArea().getY(),(int)wx.getRedPacketArea().getWidth(),(int)wx.getRedPacketArea().getHeight()),true);
+				this.shotScreen(wx.getX()+(int)wx.getRedPacketArea().getX(),wx.getY()+(int)wx.getRedPacketArea().getY(),(int)wx.getRedPacketArea().getWidth(),(int)wx.getRedPacketArea().getHeight()),true);
 			sit.setMyPacket(Float.parseFloat(myPacket));			
 		}
 		this.mouseDrag(wx.getX()+wx.getFullWidth()/2, wx.getY()+wx.getHeight(), wx.getX()+wx.getFullWidth()/2, wx.getY());
 		this.parseRedPacketPage(wx, this.waitForStaticPage(wx), sit, openGroup);
-		
+		System.out.println(sit);
 		if (openGroup) {
 			while (!sit.getOver()) {
 				this.backWX(wx);
 				this.waitForChatPage(wx);
-				sit = this.processNewRedPacket(wx, openGroup, sit);
+				this.processNewRedPacket(wx, openGroup, sit);
 			}
 		} else {
 			System.out.println("small group " + sit.toString());
@@ -235,10 +234,20 @@ public class AssistRobot {
 		if (image == null) {
 			return false;
 		}
+		boolean start = false;
 		for (int i = image.getHeight()-1; i >= 0; i--) {
-			if (image.getRGB(image.getWidth()/2, i) != Weixin.topAreaBGColor.getRGB()) {
-				return true;
+			if (image.getRGB(image.getWidth()/2, i) == Weixin.topAreaBGColor.getRGB()) {
+				if (start == false) {
+					start = true;
+				}
+			} else {
+				if (start == true) {
+					return true;
+				} else {
+					
+				}
 			}
+			
 		}
 		return false;
 	}
@@ -248,12 +257,27 @@ public class AssistRobot {
 		BufferedImage newImage = this.shotScreen(wx.getTopArea());
 		while (!this.assertSearchPage(curImage) || !assertSameImage(curImage, newImage)) {
 			curImage = newImage;
-			this.delay(50);
+			this.delay(30);
 			newImage = this.shotScreen(wx.getTopArea());
 //			Debuger.drawPointOnImage(newImage, new Point((int)wx.getWXHomeIconLocation().getX()-wx.getX(), (int)wx.getWXHomeIconLocation().getY()-wx.getY()));
-//			Debuger.writeImage(newImage, "homepage."+System.currentTimeMillis()+".bmp");
+//			Debuger.writeImage(newImage, "wait4searchPage" + System.currentTimeMillis() + ".bmp");
 		}
+
 		return newImage;
+	}
+	
+	public boolean assertMostUsedRetPage(BufferedImage image) {
+		if (image == null) {
+			return false;
+		}
+		for (int i = 0; i < image.getWidth(); i++) {
+//			if (image.getRGB(i, image.getHeight()*71/462) == Weixin.searchResultUnderlineColor.getRGB()) {
+			if (image.getRGB(i, image.getHeight()*80/462) != Weixin.whiteColor.getRGB()) {
+				return true;
+			}
+		}	
+		
+		return false;
 	}
 	
 	public boolean assertSearchResultPage(BufferedImage image) {
@@ -262,7 +286,7 @@ public class AssistRobot {
 		}
 		for (int i = 0; i < image.getWidth(); i++) {
 //			if (image.getRGB(i, image.getHeight()*71/462) == Weixin.searchResultUnderlineColor.getRGB()) {
-			if (image.getRGB(i, image.getHeight()*71/462) != Weixin.whiteColor.getRGB()) {
+			if (image.getRGB(i, image.getHeight()*130/462) != Weixin.whiteColor.getRGB()) {
 				return true;
 			}
 		}	
@@ -270,20 +294,33 @@ public class AssistRobot {
 		return false;
 	}
 	
+	public BufferedImage waitForMostUsedRetPage(Weixin wx) {
+		BufferedImage curImage = null;
+		BufferedImage newImage = this.shotScreen(wx.getArea());
+		while (!this.assertMostUsedRetPage(curImage) || !assertSameImage(curImage, newImage)) {
+			curImage = newImage;
+			this.delay(10);
+			newImage = this.shotScreen(wx.getArea());
+//			Debuger.drawLineOnImage(newImage,new Point(0,wx.getHeight()*80/462),new Point(wx.getWidth(),wx.getHeight()*80/462));
+//			Debuger.writeImage(newImage, "searchResultImage" + System.currentTimeMillis() + ".bmp");
+		}
+		return newImage;
+	}
+	
 	public BufferedImage waitForSearchResultPage(Weixin wx) {
 		BufferedImage curImage = null;
 		BufferedImage newImage = this.shotScreen(wx.getArea());
 		while (!this.assertSearchResultPage(curImage) || !assertSameImage(curImage, newImage)) {
 			curImage = newImage;
-			this.delay(30);
+			this.delay(10);
 			newImage = this.shotScreen(wx.getArea());
-			Debuger.drawLineOnImage(newImage,new Point(0,wx.getHeight()*71/462),new Point(wx.getWidth(),wx.getHeight()*71/462));
-			Debuger.writeImage(newImage, "searchResultImage" + System.currentTimeMillis() + ".bmp");
+//			Debuger.drawLineOnImage(newImage,new Point(0,wx.getHeight()*80/462),new Point(wx.getWidth(),wx.getHeight()*80/462));
+//			Debuger.writeImage(newImage, "searchResultImage" + System.currentTimeMillis() + ".bmp");
 		}
 		return newImage;
 	}
 	
-	public void enterChatGroup(Weixin wx, String groupName) {
+	public void enterChatGroup(Weixin wx, String groupName, boolean mostUsed) {
 		if (wx == null || groupName == null) {
 			return;
 		}
@@ -295,10 +332,17 @@ public class AssistRobot {
 		this.waitForSearchPage(wx);
 		for (int i = 0; i < groupName.length(); i++) {
 			this.pressKey(groupName.charAt(i));
+			this.delay(10);
 		}
-		this.waitForSearchResultPage(wx);
+		if (mostUsed) {
+			this.waitForMostUsedRetPage(wx);
+//			this.delay(200);
+			this.clickPos(wx.getMostUsedRetLocation());
+		} else {
+			this.waitForSearchResultPage(wx);
 //		this.delay(200);
-		this.clickPos(wx.getSearchedFirstRetLocation());
+			this.clickPos(wx.getSearchedFirstRetLocation());
+		}
 		this.waitForChatPage(wx);
 	}
 	
@@ -322,11 +366,12 @@ public class AssistRobot {
 		if (sit == null) {
 			sit = new Situation();
 		}
-		sit.clearPackets();
 		boolean isOver = this.getRedPacketOverState(wx, image);
+		sit.setOver(isOver);
 		if (openGroup && !isOver) {
 			return;
 		}
+		sit.clearPackets();
 		int top = -1;
 		int bottom = -1;
 		int times = 1;
@@ -486,15 +531,15 @@ public class AssistRobot {
 		return false;
 	}
 	
-	public boolean waitForSetupRedPacketPage(Weixin wx) {
+	public BufferedImage waitForSetupRedPacketPage(Weixin wx) {
 		BufferedImage curImage = null;
 		BufferedImage newImage = this.shotScreen(wx.getArea());
 		while (!this.getWXSetupRedPacketPage(wx, curImage) || !assertSameImage(curImage, newImage)) {
 			curImage = newImage;
-			this.delay(10);
+			this.delay(50);
 			newImage = this.shotScreen(wx.getArea());
 		}
-		return true;
+		return newImage;
 	}
 	
 	public boolean getWXSetupRedPacketPage(Weixin wx, BufferedImage image) {
@@ -630,25 +675,58 @@ public class AssistRobot {
 	
 	public void postRedPacket(Weixin wx, String count, String amount) {
 		this.clickPos(wx.getPostButton());
-		this.delay(200);
+		this.waitForStaticPage(wx);
 		this.clickPos(wx.getRedPacketButton());
-		this.delay(500);
+//		this.delay(500);
+		this.waitForStaticPage(wx);
 		this.clickPos(wx.getRedCountTextField());
-		this.delay(500);
-		this.inputNumber(wx, count);
-		this.clickPos(wx.getFoldKeybroadButton());
-		this.delay(200);		
+//		this.delay(500);
+		this.waitForStaticPage(wx);
+//		this.inputNumber(wx, count);
+		this.pressNumber(count);
+//		this.clickPos(wx.getFoldKeybroadButton());
+//		this.delay(200);
+//		this.waitForStaticPage(wx);
 		this.clickPos(wx.getRedAmountTextField());
-		this.delay(500);
-		this.inputNumber(wx, amount);
-		this.clickPos(wx.getFoldKeybroadButton());
+//		this.delay(500);
+//		this.waitForStaticPage(wx);
+//		this.inputNumber(wx, amount);
+		this.pressNumber(amount);
+//		this.clickPos(wx.getFoldKeybroadButton());
+		do {
+			this.pressKey(KeyEvent.VK_ESCAPE);
+			this.waitForStaticPage(wx);
+		} while (!this.getWXSetupRedPacketPage(wx, this.shotScreen(wx.getArea())));
 		this.waitForSetupRedPacketPage(wx);
+		System.out.println("wait for setup red packet");
 //		this.delay(200);
 		this.clickPos(wx.getSetupRedPacketButton());
 		this.waitForPayPage(wx);
 		this.clickPos(wx.getInjectRedPacketButton());
-		this.waitForChatPage(wx);
+//		this.waitForChatPage(wx);
+		this.waitForRedpacketChatpage(wx);
 		this.pressKey(KeyEvent.VK_ESCAPE);
+	}
+	
+	public boolean findRedpacketChatpage(BufferedImage image) {
+		int startX = image.getWidth()/2;
+		for (int i = image.getHeight()-1; i >= 0; i--) {
+			if (image.getRGB(startX, i) == Weixin.redPacketBGColor.getRGB()) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public BufferedImage waitForRedpacketChatpage(Weixin wx) {
+		BufferedImage curImage = null;
+		BufferedImage newImage = this.shotScreen(wx.getArea());
+		while (!this.findRedpacketChatpage(newImage) || !assertSameImage(curImage, newImage)) {
+			curImage = newImage;
+			this.delay(10);
+			newImage = this.shotScreen(wx.getArea());
+		}
+		return newImage;
 	}
 	
 	public void pressKey(int keyCode) {
@@ -656,9 +734,16 @@ public class AssistRobot {
 		this.robot.keyRelease(keyCode);
 	}
 	
-	public void inputNumber(Weixin wx, String number) {
-		for (int i = 0 ; i < number.length(); i++) {
-			this.clickPos(wx.getKeyPoint(number.charAt(i)+""));
+//	public void inputNumber(Weixin wx, String number) {
+//		for (int i = 0 ; i < number.length(); i++) {
+//			this.clickPos(wx.getKeyPoint(number.charAt(i)+""));
+//		}
+//	}
+	
+	public void pressNumber(String number) {
+		for (int i = 0; i < number.length(); i++) {
+			this.pressKey(number.charAt(i));
+			this.delay(30);
 		}
 	}
 	

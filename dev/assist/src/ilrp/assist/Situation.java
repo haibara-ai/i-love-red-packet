@@ -66,6 +66,8 @@ public class Situation {
 		sb.append("\n");
 		sb.append("min packet:"+this.min + "\n");
 		sb.append("max packet:"+this.max+"\n");
+		sb.append("is over:"+this.isOver+"\n");
+		sb.append("packets count:"+this.packets.size()+"\n");
 		return sb.toString();
 	}
 	

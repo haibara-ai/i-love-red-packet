@@ -34,6 +34,10 @@ public class Debuger {
 	}
 	
 	public static void stopTimer(String timerName) {
+		stopTimer(timerName,false);
+	}
+	
+	public static void stopTimer(String timerName, boolean print) {
 		stopMap.put(timerName, System.currentTimeMillis());
 		if (!startMap.containsKey(timerName)) {
 			System.err.println("error timer set");
@@ -42,7 +46,9 @@ public class Debuger {
 				System.err.println("error timer set");
 			} else {
 				timerMap.put(timerName, stopMap.get(timerName) - startMap.get(timerName));
-//				System.out.println(timerName + ":" + timerMap.get(timerName));
+				if (print) {
+					System.out.println(timerName + ":" + timerMap.get(timerName));
+				}
 			}
 		}
 	}

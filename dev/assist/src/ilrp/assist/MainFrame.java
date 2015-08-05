@@ -82,7 +82,7 @@ public class MainFrame {
 		JButton button_3 = new JButton("\u505C\u6B62");
 		button_3.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				driver.postRedPacket(driver.wx1, textField.getText(), textField_1.getText());
+//				driver.postRedPacket(driver.wx1, textField.getText(), textField_1.getText());
 			}
 		});
 		button_3.setBounds(252, 219, 157, 33);

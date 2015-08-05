@@ -96,7 +96,11 @@ public class Driver implements Runnable{
 //		System.out.println("search page");
 //		ar.waitForSearchResultPage(wx1);
 //		System.out.println("search result here");
-		this.rushRedPacket(wx1,wx2);
+//		ar.backWX(wx1);
+//		ar.waitForWXHomePage(wx1);
+//		ar.enterChatGroup(wx1, "innergroup");
+//		ar.postRedPacket(wx1, "1", "0.01");
+		this.rushRedPacket(wx1);
 //		ar.viewAndTransferRedPacket(wx1, ar.waitForChatPage(wx1), "zhaohongbao");
 //		this.rushRedPacket(wx1);
 //		this.postRedPacket(wx1, "5", "0.05");
@@ -122,9 +126,9 @@ public class Driver implements Runnable{
 //		ar.clickRedPacket(wx);
 //	}
 	
-	public void postRedPacket(Weixin wx, String count, String amount) {
-		ar.postRedPacket(wx, count, amount);
-	}
+//	public void postRedPacket(Weixin wx, String count, String amount) {
+//		ar.postRedPacket(wx, count, amount);
+//	}
 	
 	public void setupWeixin() {
 		wx1 = new Weixin("alice");
@@ -138,13 +142,91 @@ public class Driver implements Runnable{
 	public boolean shouldTransfer = true;
 	
 	private void rushRedPacket(Weixin wx1, Weixin wx2) {
+		boolean firstRound = true;
+		ar.waitForNewRedPacket(wx1, ar.shotScreen(wx1.getArea()));		
+		do {
+			Situation sit = new Situation();	
+			System.out.println(wx1.getName() + " get new red packet");	
+			do {
+				ar.processNewRedPacket(wx1, true, sit);
+				ar.backWX(wx1);
+				ar.waitForChatPage(wx1);
+			} while (!sit.getOver());
+//			if (openGroup) {
+//				while (!sit.getOver()) {
+//					this.backWX(wx);
+//					this.waitForChatPage(wx);
+//					this.processNewRedPacket(wx, openGroup, sit);
+//				}
+//			} else {
+//				System.out.println("small group " + sit.toString());
+//				while (sit.getPacketsCount() != 2) {
+//					this.backWX(wx);
+//					this.waitForChatPage(wx);
+//					sit = this.processNewRedPacket(wx, openGroup, sit);
+//				}
+//			}
+
+			System.out.println("open group situation:" + sit.toString());
+			ar.backWX(wx1);
+			ar.waitForChatPage(wx1);
+			if (sit.getMin() == sit.getMyPacket()) {
+				turnMaster = true;
+			}
+			if (turnMaster) {
+				System.out.println("turn master");
+				int round = 0;
+				int n = 4;
+				float amount = 0.1f;
+				ar.backWX(wx1);
+				System.out.println("first round:"+firstRound);
+				if (!firstRound) {
+					ar.backWX(wx1);
+				}
+				ar.waitForWXHomePage(wx1);				
+				ar.enterChatGroup(wx1, "innergroup",true);
+				Debuger.startTimer("private group red packet:");
+				do {
+					round++;
+					System.out.println("round:"+round);
+
+//					ar.clickPos(wx1.getTop2ChatGroupLocation());
+					ar.waitForChatPage(wx1);
+					ar.postRedPacket(wx1, n+"", amount+"");
+//					ar.delay(100);
+//					ar.backWX(wx2);
+//					ar.clickPos(wx2.getTop2ChatGroupLocation());
+//					ar.clickRedPacket(wx2);
+//					ar.backWX(wx1);
+					ar.waitForChatPage(wx1);
+					sit = new Situation();
+					ar.processNewRedPacket(wx1, false, sit);
+					ar.backWX(wx1);
+					System.out.println("private group situation:"+sit.toString());
+				} while (sd.decide2(round, n, 0, sit.getRedpackets().get(0), sit.getRedpackets().get(1), amount));
+				Debuger.stopTimer("private group red packet:",true);
+				ar.viewAndTransferRedPacket(wx1, ar.waitForChatPage(wx1), "zhaohongbao");
+				ar.backWX(wx1);
+				ar.waitForChatPage(wx1);
+				ar.backWX(wx1);
+				ar.waitForSearchPage(wx1);
+				ar.backWX(wx1);
+				ar.waitForWXHomePage(wx1);
+//				ar.backWX(wx1);
+				ar.enterChatGroup(wx1, "zhaohongbao",true);
+				firstRound = false;
+			}
+		} while (working);
+	}
+	
+	private void rushRedPacket(Weixin wx1) {
 //		BufferedImage focusImage = null;
 		boolean firstRound = true;
+		ar.waitForNewRedPacket(wx1, ar.shotScreen(wx1.getArea()));		
 		do {
-			Situation sit = new Situation();
-			ar.waitForNewRedPacket(wx1, ar.shotScreen(wx1.getArea()));			
+			Situation sit = new Situation();	
 			System.out.println(wx1.getName() + " get new red packet");			
-			sit = ar.processNewRedPacket(wx1, true, sit);
+			ar.processNewRedPacket(wx1, true, sit);
 			
 			System.out.println("open group situation:" + sit.toString());
 			ar.backWX(wx1);
@@ -163,7 +245,8 @@ public class Driver implements Runnable{
 					ar.backWX(wx1);
 				}
 				ar.waitForWXHomePage(wx1);				
-				ar.enterChatGroup(wx1, "privateGroup");
+				ar.enterChatGroup(wx1, "innergroup",true);
+				Debuger.startTimer("private group red packet:");
 				do {
 					round++;
 					System.out.println("round:"+round);
@@ -176,11 +259,13 @@ public class Driver implements Runnable{
 //					ar.clickPos(wx2.getTop2ChatGroupLocation());
 //					ar.clickRedPacket(wx2);
 //					ar.backWX(wx1);
+					ar.waitForChatPage(wx1);
 					sit = new Situation();
 					ar.processNewRedPacket(wx1, false, sit);
 					ar.backWX(wx1);
 					System.out.println("private group situation:"+sit.toString());
 				} while (sd.decide2(round, n, 0, sit.getRedpackets().get(0), sit.getRedpackets().get(1), amount));
+				Debuger.stopTimer("private group red packet:",true);
 				ar.viewAndTransferRedPacket(wx1, ar.waitForChatPage(wx1), "zhaohongbao");
 				ar.backWX(wx1);
 				ar.waitForChatPage(wx1);
@@ -189,7 +274,7 @@ public class Driver implements Runnable{
 				ar.backWX(wx1);
 				ar.waitForWXHomePage(wx1);
 //				ar.backWX(wx1);
-				ar.enterChatGroup(wx1, "zhaohongbao");
+				ar.enterChatGroup(wx1, "zhaohongbao",true);
 				firstRound = false;
 			}
 		} while (working);
