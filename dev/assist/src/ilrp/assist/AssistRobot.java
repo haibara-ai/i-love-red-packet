@@ -212,20 +212,20 @@ public class AssistRobot {
 		this.mouseDrag(wx.getX()+wx.getFullWidth()/2, wx.getY()+wx.getHeight(), wx.getX()+wx.getFullWidth()/2, wx.getY());
 		this.parseRedPacketPage(wx, this.waitForStaticPage(wx), sit, openGroup);
 		System.out.println(sit);
-		if (openGroup) {
-			while (!sit.getOver()) {
-				this.backWX(wx);
-				this.waitForChatPage(wx);
-				this.processNewRedPacket(wx, openGroup, sit);
-			}
-		} else {
-			System.out.println("small group " + sit.toString());
-			while (sit.getPacketsCount() != 2) {
-				this.backWX(wx);
-				this.waitForChatPage(wx);
-				sit = this.processNewRedPacket(wx, openGroup, sit);
-			}
-		}
+//		if (openGroup) {
+//			while (!sit.getOver()) {
+//				this.backWX(wx);
+//				this.waitForChatPage(wx);
+//				this.processNewRedPacket(wx, openGroup, sit);
+//			}
+//		} else {
+//			System.out.println("small group " + sit.toString());
+//			while (sit.getPacketsCount() != 2) {
+//				this.backWX(wx);
+//				this.waitForChatPage(wx);
+//				sit = this.processNewRedPacket(wx, openGroup, sit);
+//			}
+//		}
 
 		return sit;
 	}
