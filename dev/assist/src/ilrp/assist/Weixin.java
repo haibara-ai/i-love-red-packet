@@ -21,6 +21,40 @@ public class Weixin {
 	private int fullWidth = -1;
 	private int height = -1;
 	
+	private String userName = null;
+	public String getUserName() {
+		return userName;
+	}
+	
+	public void setUserProfile(String username, boolean needPassword, String password) {
+		this.userName = username;
+		this.needPassword = needPassword;
+		this.password = password;
+	}
+
+	public void setUserName(String userName) {
+		this.userName = userName;
+	}
+
+	public boolean isNeedPassword() {
+		return needPassword;
+	}
+
+	public void setNeedPassword(boolean needPassword) {
+		this.needPassword = needPassword;
+	}
+
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
+	private boolean needPassword = true;
+	private String password = null;
+	
 	private Point location = null;
 	private Rectangle area = null;
 	private Rectangle areaWithBottom = null;
@@ -39,6 +73,7 @@ public class Weixin {
 	public final static Color searchUnderlineColor = new Color(63,168,29);
 	public final static Color topAreaBGColor = new Color(34,41,44);
 	public final static Color searchResultUnderlineColor = new Color(69,192,26);
+	public final static Color keyboardBGColor = new Color(224,224,224);
 	
 	private boolean inited = false;
 	
@@ -113,8 +148,8 @@ public class Weixin {
 		this.height = height;
 		this.location = new Point(x,y);
 		this.area = new Rectangle(x, y, width, height);
-		this.areaWithBottom = new Rectangle(x, y, width, height + height*48/460);
-		this.bottomArea = new Rectangle(x,y+height,width,height*48/460);
+		this.areaWithBottom = new Rectangle(x, y, width, height + height*44/460);
+		this.bottomArea = new Rectangle(x,y+height,width,height*44/460);
 		this.topArea = new Rectangle(x,y-height*42/460,width,height*42/460);
 		this.inited = true;
 		this.backButton = new Point(x+1,y-1);
