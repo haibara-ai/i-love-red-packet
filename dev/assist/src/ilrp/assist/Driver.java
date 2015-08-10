@@ -69,7 +69,7 @@ public class Driver implements Runnable {
 				System.err.println("Weixin1 initialized error");
 				return;
 			}
-			wx1.setUserProfile("haibara", true, "xxxxxxx");
+			wx1.setUserProfile("babytoo2288", true, "890228");
 			wx2 = new Weixin("bob");
 			wx2.init(new Point(s2.left, s2.top),
 					ar.shotScreen(s2.left, s2.top, s2.right - s2.left + 1, s2.bottom - s2.top + 1));
@@ -84,17 +84,7 @@ public class Driver implements Runnable {
 		}
 		ar.postRedPacket(wx2, "2", "0.03");
 		this.rushRedPacket(wx1,wx2);
-//		this.rushRedPacket(wx1);
-
 	}
-
-	// public void clickRedPacket(Weixin wx) {
-	// ar.clickRedPacket(wx);
-	// }
-
-	// public void postRedPacket(Weixin wx, String count, String amount) {
-	// ar.postRedPacket(wx, count, amount);
-	// }
 
 	public void setupWeixin() {
 		wx1 = new Weixin("alice");
@@ -118,20 +108,6 @@ public class Driver implements Runnable {
 				ar.backWX(wx1);
 				ar.waitForChatPage(wx1);
 			} while (!sit.getOver());
-			// if (openGroup) {
-			// while (!sit.getOver()) {
-			// this.backWX(wx);
-			// this.waitForChatPage(wx);
-			// this.processNewRedPacket(wx, openGroup, sit);
-			// }
-			// } else {
-			// System.out.println("small group " + sit.toString());
-			// while (sit.getPacketsCount() != 2) {
-			// this.backWX(wx);
-			// this.waitForChatPage(wx);
-			// sit = this.processNewRedPacket(wx, openGroup, sit);
-			// }
-			// }
 
 			System.out.println("open group situation:" + sit.toString());
 			ar.backWX(wx1);
@@ -155,22 +131,14 @@ public class Driver implements Runnable {
 				do {
 					round++;
 					System.out.println("round:" + round);
-
-					// ar.clickPos(wx1.getTop2ChatGroupLocation());
 					ar.waitForChatPage(wx1);
 					ar.postRedPacket(wx1, n + "", amount + "");
-					// ar.delay(100);
-					// ar.backWX(wx2);
-					// ar.clickPos(wx2.getTop2ChatGroupLocation());
-					// ar.clickRedPacket(wx2);
-					// ar.backWX(wx1);
 					sit = new Situation();
 					while (sit.getPacketsCount() != 2) {
 						ar.waitForChatPage(wx1);
 						ar.processNewRedPacket(wx1, false, sit);
 						ar.backWX(wx1);
 					}
-
 					System.out.println("private group situation:" + sit.toString());
 				} while (sd.decide2(round, n, 0, sit.getRedpackets().get(0), sit.getRedpackets().get(1), amount));
 				Debuger.stopTimer("private group red packet:", true);
@@ -181,7 +149,6 @@ public class Driver implements Runnable {
 				ar.waitForSearchPage(wx1);
 				ar.backWX(wx1);
 				ar.waitForWXHomePage(wx1);
-				// ar.backWX(wx1);
 				ar.enterChatGroup(wx1, "zhaohongbao", true);
 				firstRound = false;
 			}
@@ -189,7 +156,6 @@ public class Driver implements Runnable {
 	}
 
 	private void rushRedPacket(Weixin wx1, Weixin wx2) {
-		// BufferedImage focusImage = null;
 		boolean firstRound = true;
 		ar.waitForNewRedPacket(wx1, ar.shotScreen(wx1.getArea()));
 		do {
@@ -203,11 +169,9 @@ public class Driver implements Runnable {
 				ar.backWX(wx2);
 				ar.waitForChatPage(wx1);
 				ar.waitForChatPage(wx2);
-			} while (!sit.getOver());
+			} while (!(sit.getOver() && sit2.getOver()));
 
 			System.out.println("open group situation:" + sit.toString());
-			// ar.backWX(wx1);
-			// ar.waitForChatPage(wx1);
 			if (sit.getMin() == sit.getMyPacket()) {
 				turnMaster = true;
 			} else if (sit2.getMin() == sit2.getMyPacket()) {
@@ -218,7 +182,7 @@ public class Driver implements Runnable {
 				wx2 = wx3;
 			}
 			if (turnMaster) {
-				System.out.println("turn master");
+				System.out.println(wx1.getName() + " turn master");
 				int round = 0;
 				int n = 4;
 				float amount = 0.1f;
@@ -238,15 +202,9 @@ public class Driver implements Runnable {
 					round++;
 					System.out.println("round:" + round);
 
-					// ar.clickPos(wx1.getTop2ChatGroupLocation());
 					ar.waitForChatPage(wx1);
 					ar.postRedPacket(wx1, n + "", amount + "");
 					ar.waitForChatPage(wx2);
-					// ar.delay(100);
-					// ar.backWX(wx2);
-					// ar.clickPos(wx2.getTop2ChatGroupLocation());
-					// ar.clickRedPacket(wx2);
-					// ar.backWX(wx1);
 					sit = new Situation();
 					sit2 = new Situation();
 					ar.processNewRedPacket(wx2, false, sit2);
@@ -265,12 +223,12 @@ public class Driver implements Runnable {
 				ar.backWX(wx1);
 				ar.waitForSearchPage(wx1);
 				ar.backWX(wx1);
-				ar.waitForWXHomePage(wx1);
-				// ar.backWX(wx1);
+				ar.waitForWXHomePage(wx1);				
 				ar.enterChatGroup(wx1, "zhaohongbao", true);
+				
 				ar.backWX(wx2);
-				ar.waitForSearchPage(wx1);
-				ar.backWX(wx1);
+				ar.waitForSearchPage(wx2);
+				ar.backWX(wx2);
 				ar.waitForWXHomePage(wx2);
 				ar.enterChatGroup(wx2, "zhaohongbao", true);
 				firstRound = false;

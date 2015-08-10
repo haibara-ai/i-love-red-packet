@@ -61,7 +61,7 @@ public class Weixin {
 	private Rectangle bottomArea = null;
 	private Rectangle topArea = null;
 	
-	public final static Color openRedPacketBGColor = new Color(255, 170, 59);
+	public final static Color openRedPacketButtonColor = new Color(255, 170, 59);
 	public final static Color redPacketBGColor = new Color(250, 157, 59);
 	public final static Color wxBGColor = new Color(235, 235, 235);
 	public final static Color redPacketPageColor = new Color(214, 86, 69);
@@ -74,6 +74,7 @@ public class Weixin {
 	public final static Color topAreaBGColor = new Color(34,41,44);
 	public final static Color searchResultUnderlineColor = new Color(69,192,26);
 	public final static Color keyboardBGColor = new Color(224,224,224);
+	public final static Color openRedPacketBGColor = new Color(163,68,55);
 	
 	private boolean inited = false;
 	
