@@ -76,10 +76,28 @@ public class AssistRobot {
 
 	public BufferedImage waitForNewRedPacket(Weixin wx, BufferedImage baseImage) {
 		BufferedImage newImage = null;
+		Point latestPoint = null;
 		do {
 			newImage = this.shotScreen(wx.getArea());
-			this.delay(30);
-		} while (this.assertSameImage(baseImage, newImage) || this.getLatestRedPacketPoint(wx, newImage) == null);
+			this.delay(50);
+			latestPoint = this.getLatestRedPacketPoint(wx, newImage);
+			if (latestPoint == null) {
+				wx.setLatestRedpacketLocation(-1);
+				continue;
+			} else {
+				if (wx.getLatestRedpacketLocation() == -1) {
+					wx.setLatestRedpacketLocation((int)latestPoint.getY());
+					break;
+				} else {
+					if (latestPoint.getY() > wx.getLatestRedpacketLocation()) {
+						wx.setLatestRedpacketLocation((int)latestPoint.getY());
+						break;
+					} else {
+						
+					}
+				}
+			}
+		} while (true);
 		return newImage;
 	}
 
@@ -122,7 +140,7 @@ public class AssistRobot {
 			}
 
 			this.clickPos(new Point(wx.getX() + wx.getWidth() / 2, wx.getY() + wx.getHeight() * 100 / 462));
-			this.delay(300);
+			this.delay(200);
 			this.clickPos(wx.getSendTransferRedPacketButton());
 			this.waitForRedPacketPage(wx);
 			this.backWX(wx);
@@ -216,11 +234,9 @@ public class AssistRobot {
 		return -1;
 	}
 
-	public void processNewRedPacket(Weixin wx, boolean openGroup, Situation sit) {
+	public void processNewRedPacket(Weixin wx, boolean openGroup, Situation sit, boolean needParseAllPackets) {
 		Debuger.startTimer("process new red packet");
 		this.clickPos(this.getLatestRedPacketPoint(wx, this.shotScreen(wx.getArea())));
-//		boolean openedRedPacket = false;
-//		boolean beenRushed = false;
 		int clickRedpacketRet = -1;
 		// 0 unopen; 1 opened; 2 failed;
 		do {
@@ -235,7 +251,7 @@ public class AssistRobot {
 			
 		} else if (clickRedpacketRet == 2) {
 			System.out.println("redpacket has been rushed");
-			this.pressKey(KeyEvent.VK_ESCAPE);
+			sit.setRushedByOthers(true);
 			return;
 		}
 
@@ -251,7 +267,10 @@ public class AssistRobot {
 		}
 		this.mouseDrag(wx.getX() + wx.getFullWidth() / 2, wx.getY() + wx.getHeight(), wx.getX() + wx.getFullWidth() / 2,
 				wx.getY());
-		this.parseRedPacketPage(wx, this.waitForStaticPage(wx), sit, openGroup);
+		this.delay(300);
+		if (needParseAllPackets) {
+			this.parseRedPacketPage(wx, this.waitForStaticPage(wx), sit, openGroup);
+		}
 		System.out.println(sit);
 	}
 
@@ -401,11 +420,12 @@ public class AssistRobot {
 					BufferedImage focusImage = this.shotScreen(wx.getX() + wx.getFullWidth() * 2 / 3, wx.getY() + top,
 							wx.getFullWidth() / 3 - wx.getHeight() * 29 / 460, (bottom - top) / 2);
 					String regret = OCRTask.recognize(OCRTask.shrinkImage(focusImage, 2.0), false);
-					if (regret.indexOf('.') == -1) {
-						regret = regret.replace(" ", ".");
-					} else {
-						regret = regret.replace(" ", "");
-					}
+					Debuger.writeImage(OCRTask.shrinkImage(focusImage, 2.0), "ocr."+System.currentTimeMillis()+".bmp");
+//					if (regret.indexOf('.') == -1) {
+//						regret = regret.replace(" ", ".");
+//					} else {
+//						regret = regret.replace(" ", "");
+//					}
 					sit.addRedpacket(Float.parseFloat(regret));
 					bottom = top = -1;
 					if (image.getRGB(wx.getFullWidth() / 2, i - 2) != Weixin.whiteColor.getRGB()) {
@@ -621,10 +641,11 @@ public class AssistRobot {
 
 	public void postRedPacket(Weixin wx, String count, String amount) {
 		this.clickPos(wx.getPostButton());
-		this.waitForStaticPage(wx);
+		this.delay(100);
 		this.clickPos(wx.getRedPacketButton());
-		this.waitForStaticPage(wx);
+		this.delay(100);
 		this.pressNumber(count);
+		this.delay(100);
 		this.clickPos(wx.getRedAmountTextField());
 		this.pressNumber(amount);
 		this.delay(200);

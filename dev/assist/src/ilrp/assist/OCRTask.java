@@ -44,6 +44,7 @@ public class OCRTask implements Runnable{
 	public static String recognize(BufferedImage image, boolean preProcessed) {
 		String ret = "";
 		Debuger.startTimer("ocr");
+//		image = binarizedImage(image);
 		if (preProcessed) {
 			image = normalizedImage(image);
 		}

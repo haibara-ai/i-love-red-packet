@@ -10,7 +10,16 @@ public class Situation {
 	private float max = Float.MIN_VALUE;
 	private float myPacket = -1;
 	private boolean isOver = false;
+	private boolean rushedByOthers = false;
 	
+	public boolean isRushedByOthers() {
+		return rushedByOthers;
+	}
+
+	public void setRushedByOthers(boolean rushedByOthers) {
+		this.rushedByOthers = rushedByOthers;
+	}
+
 	public Situation () {
 		
 	}

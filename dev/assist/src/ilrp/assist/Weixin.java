@@ -61,6 +61,16 @@ public class Weixin {
 	private Rectangle bottomArea = null;
 	private Rectangle topArea = null;
 	
+	private int latestRedpacketLocation = -1;
+	
+	public int getLatestRedpacketLocation() {
+		return latestRedpacketLocation;
+	}
+
+	public void setLatestRedpacketLocation(int latestRedpacketLocation) {
+		this.latestRedpacketLocation = latestRedpacketLocation;
+	}
+
 	public final static Color openRedPacketButtonColor = new Color(255, 170, 59);
 	public final static Color redPacketBGColor = new Color(250, 157, 59);
 	public final static Color wxBGColor = new Color(235, 235, 235);
@@ -181,7 +191,7 @@ public class Weixin {
 		this.openRedPacketButton = new Point(x+fullWidth/2,y+height*16/23);
 		this.redPacketTop1GroupLocation = new Point(x+fullWidth/2,y+height*7/23);
 		this.redPacketTop2GroupLocation = new Point(x+fullWidth/2,y+height*9/23);
-		this.sendTransferRedPacketButton = new Point(x+fullWidth*11/16,y+height*16/23);
+		this.sendTransferRedPacketButton = new Point(x+height*25/46,y+height*14/23);
 		this.redPacketArea = new Rectangle(0, height*19/46, width, height*3/23);
 		this.viewRedPacketDetailButton = new Point(x+fullWidth/2,y+height*20/23);
 		

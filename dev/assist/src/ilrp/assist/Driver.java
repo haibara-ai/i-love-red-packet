@@ -1,6 +1,7 @@
 package ilrp.assist;
 
 import java.awt.Point;
+import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -69,7 +70,7 @@ public class Driver implements Runnable {
 				System.err.println("Weixin1 initialized error");
 				return;
 			}
-			wx1.setUserProfile("babytoo2288", true, "890228");
+			wx1.setUserProfile("babytoo2228", true, "890228");
 			wx2 = new Weixin("bob");
 			wx2.init(new Point(s2.left, s2.top),
 					ar.shotScreen(s2.left, s2.top, s2.right - s2.left + 1, s2.bottom - s2.top + 1));
@@ -82,7 +83,7 @@ public class Driver implements Runnable {
 			System.err.println("too many haimawan simulators!");
 			return;
 		}
-		ar.postRedPacket(wx2, "2", "0.03");
+//		ar.postRedPacket(wx2, "2", "0.03");
 		this.rushRedPacket(wx1,wx2);
 	}
 
@@ -104,7 +105,7 @@ public class Driver implements Runnable {
 			Situation sit = new Situation();
 			System.out.println(wx1.getName() + " get new red packet");
 			do {
-				ar.processNewRedPacket(wx1, true, sit);
+				ar.processNewRedPacket(wx1, true, sit, true);
 				ar.backWX(wx1);
 				ar.waitForChatPage(wx1);
 			} while (!sit.getOver());
@@ -119,7 +120,7 @@ public class Driver implements Runnable {
 				System.out.println("turn master");
 				int round = 0;
 				int n = 4;
-				float amount = 0.1f;
+				float amount = 1f;
 				ar.backWX(wx1);
 				System.out.println("first round:" + firstRound);
 				if (!firstRound) {
@@ -136,7 +137,7 @@ public class Driver implements Runnable {
 					sit = new Situation();
 					while (sit.getPacketsCount() != 2) {
 						ar.waitForChatPage(wx1);
-						ar.processNewRedPacket(wx1, false, sit);
+						ar.processNewRedPacket(wx1, false, sit, true);
 						ar.backWX(wx1);
 					}
 					System.out.println("private group situation:" + sit.toString());
@@ -157,29 +158,47 @@ public class Driver implements Runnable {
 
 	private void rushRedPacket(Weixin wx1, Weixin wx2) {
 		boolean firstRound = true;
-		ar.waitForNewRedPacket(wx1, ar.shotScreen(wx1.getArea()));
-		do {
+		do {			
 			Situation sit = new Situation();
 			Situation sit2 = new Situation();
 			System.out.println(wx1.getName() + " get new red packet");
+			ar.waitForNewRedPacket(wx1, ar.shotScreen(wx1.getArea()));
+			boolean rushAG = false;
 			do {
-				ar.processNewRedPacket(wx1, true, sit);
-				ar.processNewRedPacket(wx2, true, sit2);
-				ar.backWX(wx1);
-				ar.backWX(wx2);
-				ar.waitForChatPage(wx1);
-				ar.waitForChatPage(wx2);
-			} while (!(sit.getOver() && sit2.getOver()));
-
+				ar.processNewRedPacket(wx1, true, sit, true);
+				if (sit.isRushedByOthers()) {
+					ar.pressKey(KeyEvent.VK_ESCAPE);
+				} else {
+					ar.backWX(wx1);
+					ar.waitForChatPage(wx1);
+				}
+				ar.processNewRedPacket(wx2, true, sit2, false);				
+				if (sit2.isRushedByOthers()) {
+					ar.pressKey(KeyEvent.VK_ESCAPE);
+				} else {
+					ar.backWX(wx2);
+					ar.waitForChatPage(wx2);
+				}
+				
+				if (sit.isRushedByOthers() && sit2.isRushedByOthers()) {
+					rushAG = true;
+					break;
+				}				
+			} while (!sit.getOver());
+			if (rushAG) {
+				continue;
+			}
 			System.out.println("open group situation:" + sit.toString());
 			if (sit.getMin() == sit.getMyPacket()) {
 				turnMaster = true;
-			} else if (sit2.getMin() == sit2.getMyPacket()) {
+			} else if (sit.getMin() == sit2.getMyPacket()) {
 				System.out.println("turn around");
 				turnMaster = true;
 				Weixin wx3 = wx1;
 				wx1 = wx2;
 				wx2 = wx3;
+			} else {
+				continue;
 			}
 			if (turnMaster) {
 				System.out.println(wx1.getName() + " turn master");
@@ -199,7 +218,6 @@ public class Driver implements Runnable {
 
 				Debuger.startTimer("private group red packet:");
 				do {
-					round++;
 					System.out.println("round:" + round);
 
 					ar.waitForChatPage(wx1);
@@ -207,15 +225,17 @@ public class Driver implements Runnable {
 					ar.waitForChatPage(wx2);
 					sit = new Situation();
 					sit2 = new Situation();
-					ar.processNewRedPacket(wx2, false, sit2);
+//					ar.waitForNewRedPacket(wx2, ar.shotScreen(wx2.getArea()));
+					ar.delay(100);
+					ar.processNewRedPacket(wx2, false, sit2, false);
 					ar.backWX(wx2);
 					ar.waitForChatPage(wx2);
 					
-					ar.processNewRedPacket(wx1, false, sit);
+					ar.processNewRedPacket(wx1, false, sit, true);
 					ar.backWX(wx1);
 					ar.waitForChatPage(wx1);
 					System.out.println("private group situation:" + sit.toString());
-				} while (sd.decide2(round, n, 0, sit.getRedpackets().get(0), sit.getRedpackets().get(1), amount));
+				} while (sd.decide2(round++, n, 0, sit.getRedpackets().get(0), sit.getRedpackets().get(1), amount));
 				Debuger.stopTimer("private group red packet:", true);
 				ar.viewAndTransferRedPacket(wx1, ar.waitForChatPage(wx1), "zhaohongbao");
 				ar.backWX(wx1);
