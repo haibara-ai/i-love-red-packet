@@ -1,14 +1,14 @@
 package ilrp.assist;
 
 import java.awt.EventQueue;
-
-import javax.swing.JFrame;
-import javax.swing.JButton;
-import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
-import javax.swing.JCheckBox;
 
 public class MainFrame {
 
@@ -22,12 +22,15 @@ public class MainFrame {
 	private Thread driverThread = null;
 	private JTextField textField;
 	private JTextField textField_1;
-	private JTextField textField_2;
-	private JTextField textField_3;
+	private JTextField txtInnergroup;
+	private JTextField txtOuttergroup;
 	private JTextField textField_4;
 	private JTextField textField_5;
 	private JTextField textField_6;
 	private JTextField textField_7;
+	private JButton btnStartSend;
+	private JButton btnStartCapture;
+	private JButton btnStop;
 	
 	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
@@ -47,7 +50,10 @@ public class MainFrame {
 	 */
 	public MainFrame() {
 		initialize();
-		this.driver = new Driver();
+	}
+
+	private Thread createDriverThread() {
+		return new Thread(new Driver());
 	}
 
 	/**
@@ -59,41 +65,54 @@ public class MainFrame {
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.getContentPane().setLayout(null);
 		
-		JButton button = new JButton("\u5F00\u59CB\u62A2\u7EA2\u5305");
-		JButton button_2 = new JButton("\u5F00\u59CB\u53D1\u7EA2\u5305");
+		btnStartCapture = new JButton("\u5F00\u59CB\u62A2\u7EA2\u5305");
+		btnStartSend = new JButton("\u5F00\u59CB\u53D1\u7EA2\u5305");
+		btnStartSend.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				// 开始发包
+				Thread thread = createDriverThread();
+				// driver.postRedPacket(driver.wx1, textField.getText(), textField_1.getText());
+				btnStartCapture.setEnabled(false);
+				btnStartSend.setEnabled(false);
+				btnStop.setEnabled(true);
+			}
+		});
 		
-		button.addActionListener(new ActionListener() {
+		btnStartCapture.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				if (driver == null) {
-					driver = new Driver();
-				}
-//				driverThread = new Thread(driver);
-//				driverThread.start();
+				// 开始抢包
+				Thread thread = createDriverThread();
 //				driver.clickRedPacket(driver.wx1);
-				button.setEnabled(false);
+				btnStartCapture.setEnabled(false);
+				btnStartSend.setEnabled(false);
+				btnStop.setEnabled(true);
 			}
 		});
-		button.setBounds(10, 219, 111, 33);
-		frame.getContentPane().add(button);
+		btnStartCapture.setBounds(10, 219, 111, 33);
+		frame.getContentPane().add(btnStartCapture);
 		
-		button_2.setBounds(131, 219, 111, 33);
-		frame.getContentPane().add(button_2);
+		btnStartSend.setBounds(131, 219, 111, 33);
+		frame.getContentPane().add(btnStartSend);
 		
-		JButton button_3 = new JButton("\u505C\u6B62");
-		button_3.addActionListener(new ActionListener() {
+		btnStop = new JButton("\u505C\u6B62");
+		btnStop.setEnabled(false);
+		btnStop.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-//				driver.postRedPacket(driver.wx1, textField.getText(), textField_1.getText());
+				// 停止所有动作
+				btnStartCapture.setEnabled(true);
+				btnStartSend.setEnabled(true);
+				btnStop.setEnabled(false);
 			}
 		});
-		button_3.setBounds(252, 219, 157, 33);
-		frame.getContentPane().add(button_3);
+		btnStop.setBounds(252, 219, 157, 33);
+		frame.getContentPane().add(btnStop);
 		
 		JLabel lblNewLabel = new JLabel("\u8F6C\u5305\u6A21\u5F0F");
 		lblNewLabel.setBounds(25, 30, 54, 15);
 		frame.getContentPane().add(lblNewLabel);
 		
 		textField = new JTextField();
-		textField.setText("1");
+		textField.setText("0.00");
 		textField.setBounds(288, 132, 121, 21);
 		frame.getContentPane().add(textField);
 		textField.setColumns(10);
@@ -103,7 +122,7 @@ public class MainFrame {
 		frame.getContentPane().add(label);
 		
 		textField_1 = new JTextField();
-		textField_1.setText("0.01");
+		textField_1.setText("0.10");
 		textField_1.setColumns(10);
 		textField_1.setBounds(288, 96, 121, 21);
 		frame.getContentPane().add(textField_1);
@@ -112,21 +131,21 @@ public class MainFrame {
 		label_1.setBounds(211, 30, 80, 15);
 		frame.getContentPane().add(label_1);
 		
-		textField_2 = new JTextField();
-		textField_2.setText("0.01");
-		textField_2.setColumns(10);
-		textField_2.setBounds(288, 27, 121, 21);
-		frame.getContentPane().add(textField_2);
+		txtInnergroup = new JTextField();
+		txtInnergroup.setText("inner_group");
+		txtInnergroup.setColumns(10);
+		txtInnergroup.setBounds(288, 27, 121, 21);
+		frame.getContentPane().add(txtInnergroup);
 		
 		JLabel label_2 = new JLabel("\u5916\u90E8\u7FA4\u540D\u79F0");
 		label_2.setBounds(211, 63, 80, 15);
 		frame.getContentPane().add(label_2);
 		
-		textField_3 = new JTextField();
-		textField_3.setText("0.01");
-		textField_3.setColumns(10);
-		textField_3.setBounds(288, 60, 121, 21);
-		frame.getContentPane().add(textField_3);
+		txtOuttergroup = new JTextField();
+		txtOuttergroup.setText("outter_group");
+		txtOuttergroup.setColumns(10);
+		txtOuttergroup.setBounds(288, 60, 121, 21);
+		frame.getContentPane().add(txtOuttergroup);
 		
 		JLabel label_3 = new JLabel("\u62BD\u6C34\u91D1\u989D");
 		label_3.setBounds(211, 135, 54, 15);
@@ -137,7 +156,7 @@ public class MainFrame {
 		frame.getContentPane().add(label_4);
 		
 		textField_4 = new JTextField();
-		textField_4.setText("1");
+		textField_4.setText("4");
 		textField_4.setColumns(10);
 		textField_4.setBounds(288, 168, 121, 21);
 		frame.getContentPane().add(textField_4);
@@ -155,19 +174,19 @@ public class MainFrame {
 		frame.getContentPane().add(chckbxB);
 		
 		textField_5 = new JTextField();
-		textField_5.setText("0.01");
+		textField_5.setText("100");
 		textField_5.setColumns(10);
 		textField_5.setBounds(74, 73, 60, 21);
 		frame.getContentPane().add(textField_5);
 		
 		textField_6 = new JTextField();
-		textField_6.setText("0.01");
+		textField_6.setText("100");
 		textField_6.setColumns(10);
 		textField_6.setBounds(74, 109, 60, 21);
 		frame.getContentPane().add(textField_6);
 		
 		textField_7 = new JTextField();
-		textField_7.setText("0.01");
+		textField_7.setText("100");
 		textField_7.setColumns(10);
 		textField_7.setBounds(74, 145, 60, 21);
 		frame.getContentPane().add(textField_7);
@@ -176,5 +195,14 @@ public class MainFrame {
 		lblNewLabel_1.setBounds(0, 194, 434, 15);
 		frame.getContentPane().add(lblNewLabel_1);
 		
+	}
+	protected JButton getBtnStartSend() {
+		return btnStartSend;
+	}
+	protected JButton getBtnStartCapture() {
+		return btnStartCapture;
+	}
+	protected JButton getBtnStop() {
+		return btnStop;
 	}
 }
